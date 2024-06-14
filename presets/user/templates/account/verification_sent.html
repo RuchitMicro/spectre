@@ -1,0 +1,30 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Verify Your E-mail Address" %}{% endblock %}
+
+{% block content %}
+
+<section class="form-section">
+    <div class="left">
+        <div class="form-container">
+            <h1>{% trans "Verify Your E-mail Address" %}</h1>
+            <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification e-mail in your main inbox, check your spam folder. Please contact us if you do not receive the verification e-mail within a few minutes.{% endblocktrans %}</p>
+        </div>
+        
+        {% include 'account/footer.html' %}
+
+        
+    </div>
+    
+    <div class="right">
+        <div class="img-container">
+            <img src="/assets/img/All Auth Images/verification.jpg" alt="">
+        </div>
+    </div>
+</section>
+
+    
+
+{% endblock %}

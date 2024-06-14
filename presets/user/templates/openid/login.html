@@ -1,0 +1,39 @@
+{% extends "openid/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}OpenID Sign In{% endblock %}
+
+{% block content %}
+
+<section class="form-section">
+    <div class="left">
+        <div class="form-container">
+            <h1>{% trans 'OpenID Sign In' %}</h1>
+
+
+            <form id="openid_login_form" class="openid_login" method="post" action="{% url 'openid_login' %}">
+            {% csrf_token %}
+            <table class="form-table">
+                {{ form.as_table }}
+            </table>
+            <button type="submit">Sign In</button>
+            </form>
+        </div>
+        
+        {% include 'account/footer.html' %}
+    </div>
+    
+    <div class="right">
+        <div class="img-container">
+            <img src="/assets/img/All Auth Images/login.jpg" alt="">
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+{% endblock %}

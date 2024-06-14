@@ -1,0 +1,328 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins";
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #F5F5F5;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  background-color: #F5F5F5;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: black;
+}
+
+.email_list {
+  margin: 30px 0px;
+}
+
+a {
+  color: black;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Poppins";
+  color: black;
+}
+
+h1 {
+  font-weight: 600;
+  font-size: 2.25rem;
+}
+
+p {
+  color: #707070;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.text-center {
+  text-align: center;
+}
+
+button,
+.button {
+  border: none;
+  padding: 20px;
+  border-radius: 7px;
+  width: 100%;
+  text-align: center;
+  background-color: black;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 20px 0px;
+}
+
+.buttonHolder {
+  display: flex;
+  gap: 20px;
+  font-size: 0.8rem;
+}
+.buttonHolder button {
+  background: none;
+  border: 1px solid black;
+  color: black;
+  display: grid;
+  place-items: center;
+  width: -moz-fit-content;
+  width: fit-content;
+  padding: 10px;
+  transition: all 0.5s ease;
+}
+.buttonHolder button:hover {
+  background-color: black;
+}
+.buttonHolder button:hover svg path {
+  stroke: white;
+}
+.buttonHolder button .icon-container {
+  height: 25px;
+  width: 25px;
+}
+.buttonHolder button svg {
+  height: 100%;
+  width: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+.verified,
+.unverified,
+.primary {
+  font-size: 0.7rem;
+  padding: 3px 7px;
+  border-radius: 5px;
+  color: white;
+}
+
+.verified {
+  background-color: #dbffdc;
+  font-weight: bold;
+  color: #28a745;
+}
+
+.unverified {
+  color: #ff1d1a;
+  background-color: #fff2f1;
+}
+
+.primary {
+  background-color: #dbffdc;
+  color: #28a745;
+}
+
+.ctrl-holder {
+  margin: 10px 0px;
+}
+.ctrl-holder label,
+.ctrl-holder input {
+  cursor: pointer;
+}
+
+.action_add {
+  margin-top: 10px;
+}
+
+.errorlist {
+  color: #ff1d1a;
+  background-color: #fff2f1;
+  padding: 10px 30px;
+  border-radius: 5px;
+  list-style: none;
+}
+
+input[type=radio] {
+  accent-color: black;
+  margin-right: 10px;
+  height: 15px;
+  width: 15px;
+}
+
+.bg-danger {
+  background-color: #dc3545;
+}
+
+.bg-warning {
+  background-color: #ffc107;
+}
+
+.bg-success {
+  background-color: #28a745;
+}
+
+.socialaccount_ballot ul {
+  list-style: none;
+}
+.socialaccount_ballot ul * {
+  text-decoration: none;
+}
+.socialaccount_ballot .socialaccount_provider {
+  display: block;
+}
+
+.login-or {
+  text-transform: capitalize;
+}
+
+.back-link {
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.back-link .icon-container {
+  height: 20px;
+  width: 20px;
+  margin-right: 10px;
+}
+.back-link .icon-container svg {
+  height: 100%;
+  width: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+.form-section {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+.form-section .left {
+  flex: 4;
+  display: grid;
+  place-items: end;
+  position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  height: auto;
+}
+.form-section .left .form-container {
+  margin: auto;
+  width: 100%;
+  padding: 50px 50px;
+  max-width: 500px;
+}
+.form-section .left .form-container .form-table {
+  width: 100%;
+  margin-top: 25px;
+}
+.form-section .left .form-container .form-table tr {
+  display: block;
+  margin-bottom: 20px;
+}
+.form-section .left .form-container .form-table tr:focus-within label {
+  color: black;
+}
+.form-section .left .form-container .form-table tr:focus-within input {
+  border: 1px solid black !important;
+}
+.form-section .left .form-container .form-table tr th {
+  display: block;
+  text-align: left;
+}
+.form-section .left .form-container .form-table tr th label {
+  transition: all 0.3s ease;
+}
+.form-section .left .form-container .form-table tr td {
+  display: block;
+}
+.form-section .left .form-container .form-table tr td input {
+  border-radius: 7px;
+  margin-top: 5px;
+  width: 100%;
+  margin-top: 5px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+.form-section .left .form-container .form-table tr td input::-moz-placeholder {
+  color: rgb(208, 208, 208);
+}
+.form-section .left .form-container .form-table tr td input::placeholder {
+  color: rgb(208, 208, 208);
+}
+.form-section .left .form-container .form-table tr td input[type=text],
+.form-section .left .form-container .form-table tr td input[type=password],
+.form-section .left .form-container .form-table tr td input[type=email] {
+  font-family: "Poppins";
+  padding: 10px;
+  border: 1px solid #d7d7d7;
+  width: 100%;
+}
+.form-section .left .form-container .form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.form-section .left .form-container .form-group .remember {
+  display: flex;
+  align-items: center;
+}
+.form-section .left .form-container .form-group .remember input {
+  margin-right: 10px;
+  height: 20px;
+  width: 20px;
+  accent-color: black;
+  cursor: pointer;
+}
+.form-section .left .form-container .form-group .remember label {
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+.form-section .left .back-link {
+  position: sticky !important;
+  left: 0 !important;
+  bottom: 0 !important;
+}
+.form-section .right {
+  flex: 6;
+}
+@media screen and (max-width: 800px) {
+  .form-section .right {
+    display: none;
+  }
+}
+.form-section .right .img-container {
+  height: 100vh;
+}
+.form-section .right .img-container img {
+  height: 100%;
+  width: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+footer {
+  position: sticky !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 100%;
+  background-color: white;
+}
+footer nav {
+  width: 100%;
+}
+footer nav ul {
+  width: 100%;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+}
+footer nav ul li {
+  padding: 10px 50px;
+}/*# sourceMappingURL=style.css.map */
