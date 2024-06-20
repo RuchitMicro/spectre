@@ -10,23 +10,12 @@ from web.models                 import *
 class IndexView(TemplateView):
     template_name = "web/index.html"
 
-class RedirectView(View):
-
-    def get(self, request, slug, *args, **kwargs):
-        redirect_url = get_object_or_404(Redirect, slug=slug)
-
-        # Increment redirect count
-        redirect_url.no_of_redirects    +=  1
-        redirect_url.save()
-
-        return redirect(str(redirect_url.target))
-
 
 class BlogListView(ListView):
-    model = Blog
-    paginate_by = 12
+    model           = Blog
+    paginate_by     = 12
     template_name   = "web/blog.html"
-    ordering = ['order_by']
+    ordering        = ['order_by']
 
     def get_queryset(self, *args, **kwargs):
         qs = super(BlogListView, self).get_queryset()
@@ -62,6 +51,7 @@ class BlogListView(ListView):
         context['settings'] = SiteSetting.objects.all().first()
         return context
 
+
 class BlogDetailView(View):
     template_name = "web/blog-detail.html"
 
@@ -85,6 +75,9 @@ class BlogDetailView(View):
         return render(request, self.template_name, context)
 
 
+
+
+# Django Unfold Admin
 def dashboard_callback(request, context):
 
     # if(closing.object.get(date=yesterday_date).exists()):

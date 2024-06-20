@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  migrate:
+    build: .
+    command: python manage.py migrate --noinput
+    volumes:
+      - .:/app
+    user: "myuser"
+
+  collectstatic:
+    build: .
+    command: python manage.py collectstatic --noinput
+    volumes:
+      - .:/app
+    depends_on:
+      - migrate
+    user: "myuser"
+
+  web:
+    build: .
+    command: gunicorn --bind 0.0.0.0:8000 mira.wsgi:application
+    volumes:
+      - .:/app
+      - ./static:/app/static  # Ensure the static files are available to the web container
+      - ./media:/app/media  # Ensure the media files are available to the web container
+    ports:
+      - "8000:8000"
+    depends_on:
+      - collectstatic
+    user: "myuser"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/static
+      - ./media:/media
+    depends_on:
+      - web
+    user: "myuser"
+

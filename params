@@ -1,0 +1,5 @@
+[DEFAULT]
+project_name = weekend_fables_api
+preset = api
+project_path = /home/ruchitmicro/project
+env_path = /home/ruchitmicro/env

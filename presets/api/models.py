@@ -63,8 +63,8 @@ class CommonModel(models.Model):
     created_by      =   models.CharField        (max_length=300, blank=True, null=True)
     updated_by      =   models.CharField        (max_length=300, blank=True, null=True)
     
-    history                 =   HistoricalRecords(inherit=True)
-    tracker                 =   FieldTracker()
+    history         =   HistoricalRecords(inherit=True)
+    tracker         =   FieldTracker()
 
     admin_meta      =   {}
     

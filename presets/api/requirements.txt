@@ -8,6 +8,8 @@ django-tinymce
 django-import-export
 django-model-utils
 django-simple-history
+djangorestframework
+djangorestframework-simplejwt
 gunicorn
 Pillow
-
+pandas
