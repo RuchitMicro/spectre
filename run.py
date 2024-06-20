@@ -73,7 +73,7 @@ def apply_preset(project_path, preset, venv_bin_path, project_name):
             handle_error(f"Preset directory {preset_dir} does not exist.")
         
         # Fetch admin.py from GitHub and save it in the app directory
-        github_url = "https://raw.githubusercontent.com/RuchitMicro/django-admin.py/main/admin.py"
+        github_url = "https://raw.githubusercontent.com/RuchitMicro/django-admin.py/django-unfold-admin/admin.py"
         response = requests.get(github_url)
         if response.status_code == 200:
             admin_py_content = response.text
