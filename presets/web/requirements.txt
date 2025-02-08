@@ -7,6 +7,7 @@ django-filter
 django-tinymce
 django-import-export
 django-model-utils
+django-recaptcha
 django-simple-history
 gunicorn
 Pillow

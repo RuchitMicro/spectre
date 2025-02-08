@@ -1,0 +1,282 @@
+{%extends 'web/layout.html'%}
+{% load static %}
+
+{%block content%}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    .contact-us-section{
+        position: relative !important;
+        flex-direction: column !important;
+        grid-gap: 0px !important;
+        align-items: center !important;
+    }
+    .form-container{
+        padding: 100px 0 !important;
+    }
+    h2{
+        font-weight: 300 !important;
+        margin-bottom: 0px !important;
+        text-align: center !important;
+        text-transform: none !important;
+        line-height: 120% !important;
+    }
+    ul{
+        padding: 0 !important;
+    }
+</style>
+
+<section class="contact-container">
+
+    <div class="contact-us-section" id="ending">
+        <div class="title">
+            <h2>
+                Let's Discuss Your Ideas, <br>Together
+            </h2>
+        </div>
+        <div class="form-container">
+            <form action="{%url 'contact-us' %}" method="post">
+                {%csrf_token%}
+                {{ general_enquiry_form.journey }} <!-- Display the form field (input, textarea, etc.) -->
+
+                <div class="form-grid">
+                    <div class="input-row">
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.name.label_tag }} <!-- Display field label -->
+                            </div>
+                            <div class="input">
+                                {{ general_enquiry_form.name }} <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.name.help_text %}
+                            <div class="help-text">
+                                {{ general_enquiry_form.name.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.name.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.email.label_tag }} <!-- Display field label -->
+                            </div>
+                            <div class="input">
+                                {{ general_enquiry_form.email }} <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.email.help_text %}
+                            <div class="help-text">
+                                {{ general_enquiry_form.email.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.email.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.email.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.phone_number.label_tag }} <!-- Display field label -->
+                            </div>
+                            <div class="input">
+                                {{ general_enquiry_form.phone_number }}
+                                <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.phone_number.help_text %}
+                            <div class="help-text">
+                                {{ general_enquiry_form.phone_number.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.phone_number.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.phone_number.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.company_name.label_tag }} <!-- Display field label -->
+                            </div>
+                            <div class="input">
+                                {{ general_enquiry_form.company_name }}
+                                <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.company_name.help_text %}
+                            <div class="help-text">
+                                {{ general_enquiry_form.company_name.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.company_name.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.company_name.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.budget.label_tag }} <!-- Display field label -->
+                            </div>
+                            <div class="input">
+                                {{ general_enquiry_form.budget }}
+                                <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.budget.help_text %}
+                            <div class="help-text">
+                                {{ general_enquiry_form.budget.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.budget.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.budget.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                    <div class="input-row">
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.service.label_tag }} <!-- Display field label -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.service.help_text %}
+                            <div class="help-text">
+                                {{ general_enquiry_form.service.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <div class="input">
+                                {{ general_enquiry_form.service }}
+                                <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.service.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.service.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-container">
+                            <div class="label-container">
+                                {{ general_enquiry_form.message.label_tag }} <!-- Display field label -->
+                            </div>
+                            <div class="input">
+                                {{ general_enquiry_form.message }}
+                                <!-- Display the form field (input, textarea, etc.) -->
+                            </div>
+
+                            <!-- Display help text if available -->
+                            {% if general_enquiry_form.message.help_text %}
+                            <div class="help-text">
+
+                                {{ general_enquiry_form.message.help_text }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Display field errors -->
+                            {% if general_enquiry_form.message.errors %}
+                            <div class="error">
+                                {{ general_enquiry_form.message.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="input-container">
+                    {{general_enquiry_form.captcha}}
+                </div>
+                
+                <div class="input-container">
+                    <input type="submit" name="submit_button" value="Submit" class="generic-form-submit-button">
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .global-cta-container{
+        display: none !important;
+    }
+</style>
+
+<!-- Journey Extract -->
+<script>
+    // Extract the 'path_visited' cookie value
+    function getCookie(name) {
+        let matches = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return matches ? decodeURIComponent(matches[1]) : '';
+    }
+
+    // Set the hidden field value with the journey data
+    document.addEventListener('DOMContentLoaded', function () {
+        const journeyInput = document.querySelector('input[name="journey"]');
+        if (journeyInput) {
+            journeyInput.value = getCookie('url_visited');
+        }
+    });
+</script>
+
+
+{%if success%}
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: 'Your message has been received. We will get back to you shortly.',
+        icon: 'success',
+        confirmButtonText: 'Ok'
+    })
+
+    // Set the journey hidden field with null value
+    document.addEventListener('DOMContentLoaded', function () {
+        const journeyInput = document.querySelector('input[name="journey"]');
+        if (journeyInput) {
+            journeyInput.value = "";
+        }
+        
+        // Purge the url_visited cookie
+        document.cookie = "url_visited=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    });
+
+
+</script>
+{%endif%}
+{%endblock%}

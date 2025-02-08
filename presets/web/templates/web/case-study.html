@@ -1,0 +1,169 @@
+{%extends 'web/layout.html'%}
+{% load static %}
+
+{%block content%}
+
+<section class="blog-container">
+    <div class="title-container">
+        <h1>Case Studies</h1>
+        <p>Latest projects, portfolio & success stories.</p>
+    </div>
+
+    <div class="blog-filter-container">
+        <div class="left">
+            <ul>
+                <li>
+                    <a href="{%url 'case-study' %}" {%if category == none %} class="active" {%endif%} >All</a>
+                </li>
+
+                {%for c in all_category%}
+                <li>
+                    <a href="{%url 'case-study' c.slug%}" {%if category == c%} class="active" {%endif%} >{{c.category}}</a>
+                </li>
+                {%endfor%}
+                
+            </ul>
+        </div>
+        <div class="right">
+            <form action="">
+                <input type="text" placeholder="Search" name="q" {%if request.GET.q%}value="{{request.GET.q}}"{%endif%}>
+                <button type="submit">
+                    <i class="fa fa-search"></i>
+                </button>
+            </form>
+
+            {%if request.GET.q%}
+            <div class="search-note">
+                Search results for "{{request.GET.q}}"
+                <a class="reset-btn" href="{%url 'case-study' %}">Reset</a>
+            </div>
+            {%endif%}
+        </div>
+
+    </div>
+<!--     
+    <div class="blog-list-container">
+        
+        {%if object_list%}
+        {%for b in object_list%}
+        <a href="{%url 'case-study-detail' b.slug %}">
+            <article class="blog-card">
+                <div class="blog-image">
+                    <img src="{{b.thumbnail.url}}" alt="{{b.title}}">
+                </div>
+                <div class="blog-content">
+                    <h2>{{b.title}}: {{b.sub_title}}</h2>
+                </div>
+                <div class="read-more">
+                    <div class="left">
+                        Read more
+                    </div>
+                    <div class="right">
+                        <img src="{%static 'web/img/circle-arrow.svg'%}" alt="">
+                    </div>
+                </div>
+            </article>  
+        </a>
+        {%endfor%}
+        {%endif%}
+
+        {%if not object_list%}
+        <div class="no-result" style="margin-bottom: 300px;">
+            <h2 style="margin: 0;">No Case Studies found 🙁</h2>
+        </div>  
+        {%endif%}
+
+    </div>
+         -->
+    
+    <div class="best-work-container">
+
+        {%if object_list%}
+
+            <div class="work-grid">
+                {%for w in object_list%}
+                <a href="{%url 'case-study-detail' w.slug%}">
+                    <div class="work">
+                        <div class="work-title">
+                            <h3>{{w.title}}: {{w.sub_title}}</h3>
+                        </div>
+                        <div class="tag">
+                            <ul>
+                                {%for t in w.split_tags%}
+                                <li>{{t}}</li>
+                                {%endfor%}
+                            </ul>
+                        </div>
+                        <div class="img-container">
+                            <img src="{{w.thumbnail.url}}" alt="wolfx-{{w.title}}">
+                        </div>
+
+                        <div class="read-more">
+                                <div class="left">
+                                    Read more
+                                </div>
+                                <div class="right">
+                                    <img src="{%static 'web/img/circle-arrow.svg'%}" alt="">
+                                </div> 
+                            </div>
+
+                    </div>
+                </a>
+
+                {%endfor%}
+            </div>
+
+        {% else %}
+            <div class="no-result" style="margin-bottom: 300px;">
+                <h2 style="margin: 0;">No Case Studies found 🙁</h2>
+            </div>  
+        {% endif %}
+    </div>
+
+
+    <!-- Pagination -->
+    {%if is_paginated%}
+    <div class="pagination">
+        <div class="page-range">
+            {% if page_obj.has_previous %}
+            <a href="?{%if request.GET.q %}&q={{request.GET.q}}{% endif %}&page=1"
+                class="btn btn-icon btn-sm btn-light mr-2 my-1">
+                First Page
+            </a>
+            <a href="?{%if request.GET.q%}&q={{request.GET.q}}{%endif%}&page={{ page_obj.previous_page_number }}"
+                class="btn btn-icon btn-sm btn-light mr-2 my-1">
+                &lt;
+            </a>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+            {% if page_obj.number == i %}
+            <a href="?{%if request.GET.q%}&q={{request.GET.q}}{%endif%}&page={{ i }}"
+                class="btn btn-icon btn-sm border-0 btn-light btn-hover-primary active-page mr-2 my-1">{{i}}</a>
+            {% else %}
+            <a href="?{%if request.GET.q%}&q={{request.GET.q}}{%endif%}&page={{ i }}"
+                class="btn btn-icon btn-sm border-0 btn-light mr-2 my-1">{{ i }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?{%if request.GET.q%}&q={{request.GET.q}}{%endif%}&page={{ page_obj.next_page_number }}"
+                class="btn btn-icon btn-sm btn-light mr-2 my-1">
+                &gt;
+            </a>
+            <a href="?{%if request.GET.q%}&q={{request.GET.q}}{%endif%}&page={{ page_obj.paginator.num_pages }}"
+                class="btn btn-icon btn-sm btn-light mr-2 my-1">
+                Last Page
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="pagination-overview">
+            <span class="text-muted">Displaying page {{ page_obj.number }} out of {{ page_obj.paginator.num_pages }} pages.</span>
+        </div>
+    </div>
+    {% endif %}
+
+</section>
+
+{%endblock%}

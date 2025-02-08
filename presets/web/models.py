@@ -49,8 +49,6 @@ from simple_history.models import HistoricalRecords
 from model_utils        import FieldTracker
 from model_utils.fields import MonitorField, StatusField
 
-# TinyMCE
-from tinymce.models                 import HTMLField
 
 
 
@@ -211,31 +209,43 @@ class FileMaster(CommonModel):
 
 # Contact
 class Contact(CommonModel):
-    full_name       =   models.CharField    (max_length=300)
-    email_id        =   models.EmailField   (max_length=300)
-    phone_number    =   models.CharField    (max_length=20)
-    requirement     =   models.TextField       ()
-    email_ok        =   models.BooleanField (default=False)
+    full_name       =   models.CharField(max_length=300)
+    email_id        =   models.EmailField(max_length=300)
+    phone_number    =   models.CharField(max_length=20)
+    company_name    =   models.CharField(max_length=300)  # Added this field
+    budget          =   models.CharField(max_length=100)  # Added this field to store budget range
+    services        =   models.TextField()  # Added this field to store selected services
+    requirement     =   models.TextField()
+    email_ok        =   models.BooleanField(default=False)
+    journey_path    =   models.TextField(
+        blank=True, null=True, help_text='A complete URL trace of the user journey that led them to fill the form.',
+    )
+    status          =   models.TextField(default='New', null=True, blank=True)
 
-    journey_path    =   models.TextField    (blank=True, null=True, help_text='A complete url trace of user journey that lead them to fill the form.')
-    
-    created_at      =   models.DateTimeField    (auto_now_add=True, blank=True, null = True)
-    updated_at      =   models.DateTimeField    (auto_now=True, blank=True, null=True)
-
-    admin_meta = {
-        'list_display': ['full_name', 'email_id', 'phone_number', 'created_at', 'updated_at',],
+    admin_meta =    {
+        'list_display'      :   ("full_name","email_id","phone_number","company_name","budget","services","requirement","status","journey_path_as_list","created_at"),
+        'list_per_page'     :   50,
+        'list_filter'       :   ("budget","status","created_at",),
+        'search_fields'     :   ("full_name","email_id","phone_number","company_name","budget",),
     }
 
+    def journey_path_as_list(self):
+        paths = self.journey_path.split('|') if self.journey_path else []
+        html = ''.join([f'<div style="display: inline; background-color: #e0e0e0; padding: 5px; border-radius: 4px;">{path}</div>' for path in paths])
+        return mark_safe(f"<div style='display: flex; grid-gap: 5px; flex-wrap: wrap;'>{html}</div>")
     def __str__(self):
         return str(self.full_name)
 
     # Notification to Support about a new entry
     def send_mail_notification(self):
-        msg_html = render_to_string('web/email/new_enquiry.html', {'Contact': self})
+        from django.template.loader import render_to_string
+        from django.core.mail import send_mail
+
+        msg_html = render_to_string('email/new_enquiry.html', {'enquiry': self})
         send_mail(
             'New enquiry from WOLFx',
             'Hello',
-            'support@wolfx.io',
+            'hello@wolfx.io',
             ['hello@wolfx.io'],
             fail_silently=True,
             html_message=msg_html,
@@ -243,15 +253,20 @@ class Contact(CommonModel):
 
     # Notification to User
     def send_mail_greeting(self):
-        msg_html = render_to_string('web/email/thank_you_for_contacting.html', {'Contact': self})
+        from django.template.loader import render_to_string
+        from django.core.mail import send_mail
+
+        msg_html = render_to_string('email/thank_you_for_contacting.html', {'enquiry': self})
         send_mail(
             'WOLFx: Thank you for Contacting us',
             'Hello',
-            'support@wolfx.io',
-            ['hello@wolfx.io'],
+            'hello@wolfx.io',
+            [self.email_id],
             fail_silently=True,
             html_message=msg_html,
         )
+
+
 
 
 
@@ -339,6 +354,126 @@ class BlogImage(CommonModel):
         verbose_name_plural = "Blog Image"
         ordering = ['order_by'] #Sort in desc order
     
+
+# Case Study
+class CaseStudyCategory(CommonModel):
+    category    =   models.CharField    (max_length=100, unique=True)
+    slug        =   models.SlugField    (max_length=100, unique=True)
+    image       =   models.FileField    (blank=True,null=True,upload_to='case_study_category/')
+   
+    order_by    =   models.IntegerField (default=0)
+
+    admin_meta =    {
+        'list_display'      :   ("__str__","order_by"),
+        'list_editable'     :   ("order_by",),
+        'list_per_page'     :   50,
+    }
+
+    def __str__(self):
+        return str(self.category)
+    
+    class Meta:
+        verbose_name_plural = "Case Study Category"
+        ordering = ['order_by']
+
+class CaseStudy(CommonModel):
+    head_default='''<meta name="title" content=" ">
+<meta name="description" content=" ">
+<meta name="keywords" content=" ">
+<meta name="robots" content="index, follow">'''
+
+    title               =   models.CharField        (max_length=200)
+    sub_title           =   models.CharField        (max_length=200, blank=True ,null=True)
+    category            =   models.ForeignKey       (CaseStudyCategory, null=True, on_delete=models.SET_NULL)
+    thumbnail           =   models.ImageField       (upload_to="case-study-thumbnail/")
+    featured_text       =   models.TextField        (null=True, blank=True)
+    text                =   models.TextField        (null=True, blank=True)
+    slug                =   models.SlugField        (unique=True)
+    tags                =   models.TextField        (null=True, blank=True, default='all')
+    head                =   models.TextField        (null=True, blank=True, default=head_default)
+    
+    related_case_study  =   models.ManyToManyField   ('self', blank=True, related_name='related_case_study')
+
+    is_featured         =   models.BooleanField     (default=False)
+    order_by            =   models.IntegerField     (default=0)
+    
+    admin_meta =    {
+        'list_display'      :   ("__str__","is_featured","order_by","created_at","updated_at"),
+        'list_editable'     :   ("order_by","is_featured",),
+        'list_per_page'     :   50,
+        'list_filter'       :   ("order_by","is_featured",),
+        'filter_horizontal' :   ('related_case_study',),
+        'inline'            :   [
+            {'CaseStudyFAQ': 'case_study'}
+        ],
+    }
+
+    def __str__(self):
+        return str(self.title)
+
+    def split_tags(self):
+        return [t for t in self.tags.split(',')]
+
+    class Meta:
+        verbose_name_plural = "Case Study"
+        ordering = ['order_by'] #Sort in desc order
+
+class CaseStudyFAQ(CommonModel):
+    case_study      =   models.ForeignKey       (CaseStudy, on_delete=models.CASCADE)
+    question        =   models.CharField        (max_length=300)
+    answer          =   models.TextField               ()
+    order_by        =   models.IntegerField     (default=0)
+
+    def __str__(self):
+        return str(self.question)
+
+    class Meta:
+        verbose_name_plural = "Case Study FAQ"
+        ordering = ['order_by'] #Sort in desc order
+
+
+
+    
+# FAQ
+class FAQCategory(CommonModel):
+    category    =   models.CharField    (max_length=100, unique=True)
+    slug        =   models.SlugField    (max_length=100, unique=True)
+    image       =   models.FileField    (blank=True,null=True,upload_to='faq_category/')
+    
+    order_by    =   models.IntegerField     (default=0)
+
+    admin_meta =    {
+        'list_display'      :   ("__str__","order_by"),
+        'list_editable'     :   ("order_by",),
+        'list_per_page'     :   50,
+    }
+
+    def __str__(self):
+        return str(self.category)
+
+    class Meta:
+        ordering = ['order_by']    
+
+class FAQ(CommonModel):
+    category    =   models.ForeignKey       (FAQCategory, null=True, on_delete=models.SET_NULL)
+    question    =   models.CharField        (max_length=300)
+    answer      =   models.TextField               ()
+
+    order_by    =   models.IntegerField     (default=0)
+    
+    admin_meta =    {
+        'list_display'      :   ("__str__","answer","category","order_by"),
+        'list_editable'     :   ("order_by",),
+        'list_per_page'     :   50,
+    }
+
+    def __str__(self):
+        return str(self.question)
+
+    class Meta:
+        ordering = ['order_by'] #Sort in desc order
+
+
 
 
 # Dynamic Head

@@ -1,58 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WOLFx: IT Company</title>
-    <link rel="icon" type="image/x-icon" href="{%if setting.favicon%}{{setting.favicon.url|default_if_none:''|default:''}}{%endif%}">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=5, minimum-scale=1, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="icon" type="image/x-icon"
+        href="{%if setting.favicon%}{{setting.favicon.url|default_if_none:''|default:''}}{%endif%}">
+
+
+    <!-- Preconnect & Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
+    <!-- Google Font -->
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        as="style" onload="this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap">
+    </noscript>
+
+
     {%load static%}
 
     {{setting.global_head|safe}}
 
     {%if local_head%}
-        {{local_head.head|safe}}
+    {{local_head.head|safe}}
     {%endif%}
 
     {%include 'web/dependencies.html'%}
+
 </head>
 
 <body>
     <header>
-        <div class="left">
-            <div class="logo">
-                <img src="{% static 'web/img/logo.png' %}" alt="logo" >
-            </div>
+        <div class="left desktop-navigation">
+            <a href="{%url 'index' %}">
+                <div class="logo">
+                    <img src="{% static 'web/img/logo_2.png' %}" alt="wolfx-logo">
+                </div>
+            </a>
         </div>
-        <div class="middle">
+        <div class="middle desktop-navigation">
             <nav>
                 <ul>
-                    <a href="">
-                        <li>Home</li>
-                    </a>
-                    <a href="">
-                        <li>About</li>
-                    </a>
-                    <a href="">
-                        <li>Services</li>
-                    </a>
-                    <a href="">
-                        <li>Work</li>
-                    </a>
+                    <li>
+                        <a href="">
+                            About
+                        </a>
+                    </li>
+                    <li>
+                        <a href="">
+                            Work
+                        </a>
+                    </li>
+                    <li>
+                        <a href="">
+                            Solutions
+                        </a>
+                    </li>
+                    <li>
+                        <a href="">
+                            Our Approach
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{%url 'blog' %}">
+                            Blog
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
-        <div class="right">
-            <div class="contact-us-button" >
-                <div>Contact Us</div>
-                <div class="img-container">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M21 12H3M17 8L21 12L17 8ZM21 12L17 16L21 12Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+        <div class="right desktop-navigation">
+            <a href="{%url 'contact-us'%}">
+                <div class="contact-us-button">
+                    <div>Contact Us</div>
+                    <div class="img-container">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21 12H3M17 8L21 12L17 8ZM21 12L17 16L21 12Z" stroke="black" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </div>
                 </div>
+            </a>
+        </div>
+        <div class="mobile-navigation">
+            <div class="left">
+                <a href="{%url 'index' %}">
+                    <div class="logo">
+                        <img src="{% static 'web/img/logo_2.png' %}" alt="wolfx-logo">
+                    </div>
+                </a>
+            </div>
+            <div class="right">
+                <div class="hamburger" id="hamburger">
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                </div>
+
+                <nav class="menu" id="menu">
+                    <ul>
+                        <li><a href="/">Home</a>
+                        <li>
+                        <li><a href="">About</a>
+                        <li>
+                        <li><a href="">Our Services</a>
+                        <li>
+                        <li><a href="">Success Stories</a>
+                        <li>
+                        <li><a href="">Our Approach</a>
+                        <li>
+                        <li><a href="{%url 'faq'%}">FAQ</a>
+                        <li>
+                        <li><a href="{%url 'contact-us'%}">Contact</a>
+                        <li>
+                    </ul>
+
+                    <div class="close-container" id="hamburger_close">
+                        <div class="line-1 line"></div>
+                        <div class="line-2 line"></div>
+                    </div>
+
+                </nav>
             </div>
         </div>
-        
     </header>
 
     <main class="main">
@@ -60,219 +145,250 @@
         {%endblock%}
     </main>
 
-    <footer></footer>
+    <footer>
+        <div class="footer-container">
+            <div class="left">
+                <div class="logo-container">
+                    <img loading="lazy" src="{% static 'web/img/logo_2.png' %}"
+                        alt="wolfx-logo">
+                </div>
+            </div>
+            <div class="right">
+                <ul>
+                    <li class="list-title">Company</li>
+                    <li>
+                        <a href="{% url 'index' %}">Home</a>
+                    </li>
+                    <li>
+                        <a href="">About us</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'contact-us'%}">Contact us</a>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li class="list-title">Services</li>
+                </ul>
+
+                <ul>
+                    <li class="list-title">Explore</li>
+                    <li>
+                        <a href="">Work</a>
+                    </li>
+                    <li>
+                        <a href="">Solutions</a>
+                    </li>
+                    <li>
+                        <a href="">Our Approach</a>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li class="list-title">Resources</li>
+                    <li>
+                        <a href="{% url 'blog' %}">Blog</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'case-study' %}">Case Studies</a>
+                    </li>
+                    <li>
+                        <a href="{%url 'faq'%}">FAQs</a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+        <div class="legal-container">
+            <p>&copy; {{current_year}} WOLFx. All rights reserved.</p>
+            <ul>
+                <li>
+                    <a href="{%url 'privacy-policy'%}">Privacy Policy</a>
+                </li>
+                <li>
+                    <a href="{%url 'terms-and-conditions'%}">Terms & Conditions</a>
+                </li>
+                <li>
+                    <a href="{%url 'cookie-policy'%}">Cookie Policy</a>
+                </li>
+                <li>
+                    <a href="">Sitemap</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
 </body>
+
+
+
+<!-- Gsap Js -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<!-- Lenis -->
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+<!-- Jquery -->
+<script src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+    integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+
+<!-- Slick -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"
+    integrity="sha512-XtmMtDEcNz2j7ekrtHvOVR4iwwaD6o/FUJe6+Zq+HgcCsk3kj4uSQQR8weQ2QVj1o0Pk6PwYLohm206ZzNfubg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"
+    integrity="sha512-17EgCFERpgZKcm0j0fEq1YCJuyAWdz9KUtv1EjVuaOz8pDnh/0nZxmU6BBXwaaxqoi9PQXnRWqlcDB027hgv9A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"
+    integrity="sha512-yHknP1/AwR+yx26cB1y0cjvQUMvEa2PFzt1c9LlS4pRQ5NOTZFWbhBig+X9G9eYW/8m0/4OXNx8pxJ6z57x0dw=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+
 
 <!-- Record visited URLS inside cookie -->
 <script>
-var current_url = new URL(window.location.href)
+    document.addEventListener("DOMContentLoaded", function () {
+        var current_path = window.location.pathname; // Get the current path
 
-if(Cookies.get('url_visited') == undefined){
-    // Set cookie value for first time
-    Cookies.set('url_visited', current_url)
-}else{
-    // Check if the last url in the cookie record is not same as the current page
-    // This means that the user has simply refreshed the page or have submited a POST request
-    // In this case we need to disregard same last values
+        // Function to get a cookie by name
+        function getCookie(name) {
+            var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            return match ? match[2] : undefined; // Do not decode, keep raw value
+        }
 
-    // get all the visited urls and store them in a array
-    url_visited = Cookies.get('url_visited').split("|");
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + value + expires + "; path=/"; // Do not encode value
+        }
 
-    // Check if last url in the array is same as the current url
-    if(url_visited.at(-1) != current_url)
-        // Set the current url in the cookie if its unique than the last entry
-        Cookies.set('url_visited', Cookies.get('url_visited') + '|' + current_url);
-}
+        // Check if the 'url_visited' cookie exists
+        var url_visited = getCookie('url_visited');
+
+        if (!url_visited) {
+            // Set cookie value for the first time
+            setCookie('url_visited', current_path, 7); // Cookie expires in 7 days
+        } else {
+            // Get all the visited paths from the cookie and split them into an array
+            var path_array = url_visited.split('|');
+
+            // Check if the last path in the array is the same as the current path
+            if (path_array[path_array.length - 1] !== current_path) {
+                // Append the current path to the cookie if it's unique from the last entry
+                path_array.push(current_path);
+                setCookie('url_visited', path_array.join('|'), 7); // Update the cookie
+            }
+        }
+    });
+
 </script>
 
 <!-- Show and Hide header -->
-<script>
-    gsap.registerPlugin(ScrollTrigger);
+<script type="module">
+    document.addEventListener("DOMContentLoaded", function () {
+        gsap.registerPlugin(ScrollTrigger);
 
-    const show_anim = gsap.from('header', { 
-        yPercent: -100,
-        paused: true,
-        duration: 0.2
-    }).progress(1);
+        let show_anim = gsap.from('header', {
+            yPercent: -100,
+            paused: true,
+            duration: 0.2
+        }).progress(1);
 
-    ScrollTrigger.create({
-    start: "top top",
-    end: "max",
-        onUpdate: (self) => {
+        ScrollTrigger.create({
+            start: "top top",
+            end: "max",
+            onUpdate: (self) => {
                 self.direction === -1 ? show_anim.play() : show_anim.reverse()
-        }
+            }
+        });
     });
-</script>
-
-<script>
-    // GSAP ScrollTrigger for h1
-    gsap.registerPlugin(ScrollTrigger);
-
-    $('#landing').css('transform-origin', `329px 412px`); // Calculate this automatically
-
-    // Enter into the C - Animation
-    gsap.to(".landing ", {
-        z: 9999, // Increase the scale to cover the entire screen
-        //rotation: -100,
-        //ease: "power2.in",
- 
-        scrollTrigger: {
-            trigger: ".landing",
-            start: "top top", // Start animation when .content-container top is at the center of the viewport
-            end: () => `+=${$(window).height()}`,
-            // end: "bottom bottom",
-            onEnter: (self) => {
-                // $('.landing').height($(window).height())
-                gsap.to('.about-us', {opacity: 0, duration: 0.0})
-            },
-            onEnterBack: (self) => {
-                // $('.landing').height($(window).height())
-                gsap.to('.about-us', {opacity: 0, duration: 0.0})
-            },
-            onLeave: (self) => {
-                // $('.landing').height(0)
-                gsap.to('.about-us', {opacity: 1, duration: 0.0})
-            },
-            onLeaveBack: (self) => {
-                // $('.landing').height(0)
-                gsap.to('.about-us', {opacity: 1, duration: 0.0})
-            },
-            scrub: 2,
-            pin: true, // Pin the element during the scroll
-            // markers: true,
-            pinSpacing: false,
-        },
-    })
-
-
-    const about_us_tl = gsap.timeline({
-        duration: 2,
-        scrollTrigger: {
-            trigger: '.journey-wrapper',
-            start: `top top`,
-            end: ()=> `+=${$(window).height()}`,
-            pin: true,
-            scrub:1,
-            markers: true,
-            pinSpacing: false,
-            onEnter: (self) => {
-                // $('.about-us').height($(window).height())
-                // gsap.to('.service-title', {opacity: 0, duration: 0.5})
-            },
-            onEnterBack: (self) => {
-                // $('.about-us').height($(window).height())
-                // gsap.to('.service-title', {opacity: 0, duration: 0.5})
-            },
-            onLeave: (self) => {
-                // $('.about-us').height(0)
-                // gsap.to('.service-title', {opacity: 1, duration: 0.5})
-            },
-            onLeaveBack: (self) => {
-                // $('.about-us').height(0)
-                // gsap.to('.service-title', {opacity: 1, duration: 0.5})
-            },
-        }
-    })
-    gsap.set('.about-content-container',{
-        transformOrigin: "30% 50%",
-    })
-    about_us_tl.to('.about-content-container',{
-        opacity: 1,
-        z: 1000,
-        rotationZ: -5,
-        duration: 2,
-    },0)
-    about_us_tl.to('.band-1',{
-        opacity: 0,
-        duration: 2,
-    },0)
-    about_us_tl.to('.band-2',{
-        opacity: 0,
-        duration: 2,
-    },0)
-    about_us_tl.to('.shape-container',{
-        opacity: 0,
-        duration: 2,
-    },0)
-    
-
-    // Service Container
-    gsap.to('.services',{
-        // opacity: 1,
-        scrollTrigger: {
-            trigger: ".services",
-            start: `top top`,
-            pin: '.services',
-            markers: true,
-            pinSpacing: false,
-            onEnter: (self) => {
-                gsap.to('.services', {opacity: 1, ease: "none"},0)
-            },
-            onEnterBack: (self) => {
-                gsap.to('.services', {opacity: 1, ease: "none"},0)
-            },
-            onLeaveBack: (self) => {
-                gsap.to('.services', {opacity: 0, ease: "none"},0)
-            },
-            onLeave: (self) => {
-                gsap.to('.services', {opacity: 0, ease: "none"},0)
-            },
-        }
-    })
-
-
-
-    // Services Card
-    const cards             = document.querySelectorAll(".service-card");
-    const totalDuration     = cards.length; // Total duration of the animation
-    const singleDuration    = totalDuration / cards.length; // Duration for each card
-
-    const tl = gsap.timeline({
-        scrollTrigger: {
-            trigger: ".services",
-            start: `top +=100px`,
-            end: `bottom center`,
-            pin: '.services',
-            scrub: true,
-            markers: true,
-            pinSpacing: false,
-        },
-        duration: totalDuration,
-    })
-
-    cards.forEach((card, index) => {
-        tl.set(card, {
-            opacity: 1,
-            duration: 1,
-            ease: "linear",
-            zIndex: cards.length - index,
-            // z: -10000,
-        }, singleDuration/1.4 * index)
-        tl.to(card, {
-            z: 1000,
-            duration: singleDuration,
-            ease: "none",
-            opacity: 0.9,
-        }, singleDuration/1.3 * index)
-    });
-   
-
-
 
 </script>
 
-
+<!-- Lenis -->
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let lenis = new Lenis()
+        function raf(time) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf);
+    });
+</script>
 
-    // const lenis = new Lenis()
+<!-- Hamburger -->
+<script>
+    const hamburger = document.getElementById('hamburger');
+    const hamburger_close = document.getElementById('hamburger_close');
+    const menu = document.getElementById('menu');
+    const header = document.querySelector('header');
+    const body = document.body;
 
-    // function raf(time) {
-    //     lenis.raf(time)
-    //     requestAnimationFrame(raf)
-    // }
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        menu.classList.toggle('active');
+        header.classList.toggle('menu-open'); // Add class when menu is open
+        if (menu.classList.contains('active')) {
+            body.style.overflow = 'hidden'; // Disable body scroll
+        } else {
+            body.style.overflow = ''; // Enable body scroll
+        }
+    });
 
-    // requestAnimationFrame(raf);
+    hamburger_close.addEventListener('click', () => {
+        hamburger.classList.toggle('active');
+        menu.classList.toggle('active');
+        header.classList.toggle('menu-open'); // Remove class when menu is closed
+        if (!menu.classList.contains('active')) {
+            body.style.overflow = ''; // Enable body scroll
+        }
+    });
 
+</script>
+
+<!-- Slick Slider -->
+<script>
+    $(document).ready(function () {
+
+        $('.slider').each(function (i, slider) {
+            $(slider).slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 1000 + Math.random() * 1000,
+                arrows: false,
+                dots: false,
+                focusOnSelect: true,
+                pauseOnHover: false,
+            });
+            // Set a random delay for the autoplay start
+            let randomStartDelay = Math.random() * 100;
+            setTimeout(() => {
+                $(slider).slick('slickPlay');
+            }, randomStartDelay);
+        });
+
+        $('.fade-slider').each(function (i, slider) {
+            $(slider).slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: false,
+                dots: false,
+                focusOnSelect: true,
+                pauseOnHover: false,
+                fade: true,
+            });
+        });
+    })
 </script>
 
 </html>

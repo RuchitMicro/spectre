@@ -1,0 +1,54 @@
+{%extends 'web/layout.html'%}
+{% load static %}
+
+{%block content%}
+
+
+<div class="faq-banner">
+    <div class="faq-banner-content">
+        <h1>Frequently Asked Questions</h1>
+        <p>
+            Here are some of the most frequently asked questions. If you have any other questions, please feel free to
+            <a href="{%url 'contact-us'%}">contact us.</a>
+        </p>
+    </div>
+</div>
+<section class="faq-page-container">
+    <div class="left">
+        <h2>FAQ Categories</h2>
+        <ul>
+            {%for c in faq_category%}
+            <li>
+                <a href="#{{c.slug}}">{{c.category}}</a>
+            </li>
+            {%endfor%}
+        </ul>
+    </div>
+    <div class="right">
+        {%for c in faq_category%}
+        <div class="faq-category" id="{{c.slug}}">
+            <h2>{{c.category}}</h2>
+            {%for f in faq%}
+            {%if c == f.category%}
+            <details>
+                <summary>
+                    <h4>
+                        {{f.question}}
+                    </h4>
+                </summary>
+                <p>{{f.answer}}</p>
+            </details>
+            {%endif%}
+            {%endfor%}
+        </div>
+        {%endfor%}
+    </div>
+</section>
+
+<style>
+    .global-cta-container {
+        display: none;
+    }
+</style>
+
+{%endblock%}

@@ -1,0 +1,113 @@
+
+.blog-content {
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        margin-top: 3rem !important;
+        margin-bottom: 1rem !important;
+        color: black !important;
+    }
+
+
+    h1 {
+        font-size: 3rem;
+
+        @media screen and (max-width:750px) {
+            font-size: 2rem;
+        }
+    }
+
+    h2 {
+        font-size: 2.5rem;
+
+        @media screen and (max-width:750px) {
+            font-size: 1.3rem;
+        }
+    }
+
+    h3 {
+        font-size: 2rem;
+
+        @media screen and (max-width:750px) {
+            font-size: 1.2rem;
+        }
+    }
+
+    p,
+    li {
+        padding: 0 20px !important;
+        font-size: 16px;
+        line-height: 32px;
+    }
+
+    p{
+        @media screen and (min-width: 300px) and (max-width: 480px) {
+            padding: 0px  !important;
+        }
+    }
+
+    .ul {
+        padding: 10px 30px !important;
+    }
+
+    ol {
+        padding-left: 10px 30px !important;
+
+        li {
+            padding: 10px 20px !important;
+        }
+    }
+
+    a {
+        color: black !important;
+        text-decoration: underline;
+    }
+
+    pre {
+        margin: 0 20px !important;
+        background: #F3F6F9;
+        font-size: 14px !important;
+
+        code {
+            display: block;
+            padding: 10px;
+        }
+    }
+
+
+    code {
+        color: #e83e8c;
+        word-wrap: break-word;
+        background-color: #F3F6F9;
+        padding: 0.15rem 0.5rem;
+        font-weight: 400;
+        border-radius: 0.42rem;
+        overflow-x: scroll;
+    }
+
+    table {
+        width: 100%; // Full-width table
+        border-collapse: collapse; // Remove space between borders
+
+        th,
+        td {
+            border: 1px solid #000; // Simple black border for all cells
+            padding: 8px; // Minimal padding for readability
+            text-align: left; // Align text to the left
+        }
+
+        th {
+            font-weight: bold; // Highlight headers slightly
+        }
+    }
+}
+
+
+body,
+main {
+    background-color: white;
+}

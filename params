@@ -1,5 +1,5 @@
 [DEFAULT]
-project_name = weekend_fables_api
-preset = api
-project_path = /home/ruchitmicro/project
-env_path = /home/ruchitmicro/env
+project_name    =   wolfx_ecommerce
+preset          =   web
+project_path    =   /home/admin1/project
+env_path        =   /home/admin1/env

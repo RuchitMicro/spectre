@@ -1,0 +1,102 @@
+{%extends 'web/layout.html'%}
+{% load static %}
+
+{%block content%}
+<link rel="stylesheet" href="{%static 'web/css/blog.min.css'%}">
+
+<section class="blog-detail-container">
+    <div class="title">
+        <div class="left"></div>
+        <div class="right">
+            <h1>
+                {{case_study.title}}
+            </h1>
+        </div>
+    </div>
+    <div class="sub-title">
+        <div class="left">
+            <p>
+                {{case_study.sub_title}}
+            </p>
+        </div>
+        <div class="right">
+        </div>
+    </div>
+    <div class="blog-category">
+        <ul>
+            {%for t in tags%}
+            <li>
+                {{t}}
+            </li>
+            {%endfor%}
+        </ul>
+    </div>
+
+    <div class="blog-timeline">
+        <div>Originally Published on: {{case_study.created_at|date}}</div>
+        <div>Last Updated on: {{case_study.updated_at|date}}</div>
+    </div>
+
+    <div class="blog-image-container">
+        <div class="blog-image">
+            <img src="{{case_study.thumbnail.url}}" alt="{{case_study.title}}">
+        </div>
+    </div>
+    <div class="blog-content">
+        {{case_study.text | safe}}
+    </div>
+</section>
+
+{%if blog.related_blog.all%}
+<section class="related-blog-container">
+    <h2>Related Blogs</h2>
+    
+    <div class="blog-list-container related-blog-slider">
+
+        {% for r in blog.related_blog.all %}
+        <a href="{%url 'Blog-Detail' r.slug %}">
+            <article class="blog-card">
+                <div class="blog-image">
+                    <img src="{{r.thumbnail.url}}" alt="{{r.title}}">
+                </div>
+                <div class="blog-content">
+                    <h2>Blog Title</h2>
+                </div>
+                <div class="read-more">
+                    <div class="left">
+                        Read more
+                    </div>
+                    <div class="right">
+                        <img src="{%static 'web/img/circle-arrow.svg'%}" alt="">
+                    </div>
+                </div>
+            </article>  
+        </a>
+        {%endfor%}
+    </div>
+</section>
+{%endif%}
+
+<!-- Slider -->
+<script>
+    $('.related-blog-slider').slick({
+        slidesToShow: 3,
+        slidesToScroll: 3,
+        autoplay: true,
+        arrows: false,
+        dots: false,
+        centerMode: false,
+    });
+</script>
+
+
+<style>
+    .global-cta-container h2{
+        color: black;
+    }
+    .global-cta-container .cta-button{
+        color: black;
+        border: 1px solid black;
+    }
+</style>
+{%endblock%}

@@ -3,4 +3,147 @@
 
 {%block content%}
 
+<section>
+    <h1>Spectre Setup: Success!</h1>
+    <p>
+        Web Template initialized. You can now start building your website.
+    </p>
+</section>
+
+<section class="form-container">
+    <form action="{%url 'contact-us' %}" method="post">
+        {%csrf_token%}
+
+        <div class="form-grid">
+            <div class="input-row">
+                <div class="input-container">
+                    <div class="label-container">
+                        {{ general_enquiry_form.name.label_tag }} <!-- Display field label -->
+                    </div>
+                    <div class="input">
+                        {{ general_enquiry_form.name }} <!-- Display the form field (input, textarea, etc.) -->
+                    </div>
+
+                    <!-- Display help text if available -->
+                    {% if general_enquiry_form.name.help_text %}
+                    <div class="help-text">
+                        {{ general_enquiry_form.name.help_text }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Display field errors -->
+                    {% if general_enquiry_form.name.errors %}
+                    <div class="error">
+                        {{ general_enquiry_form.name.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="input-container">
+                    <div class="label-container">
+                        {{ general_enquiry_form.email.label_tag }} <!-- Display field label -->
+                    </div>
+                    <div class="input">
+                        {{ general_enquiry_form.email }} <!-- Display the form field (input, textarea, etc.) -->
+                    </div>
+
+                    <!-- Display help text if available -->
+                    {% if general_enquiry_form.email.help_text %}
+                    <div class="help-text">
+                        {{ general_enquiry_form.email.help_text }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Display field errors -->
+                    {% if general_enquiry_form.email.errors %}
+                    <div class="error">
+                        {{ general_enquiry_form.email.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-container">
+                    <div class="label-container">
+                        {{ general_enquiry_form.phone_number.label_tag }} <!-- Display field label -->
+                    </div>
+                    <div class="input">
+                        {{ general_enquiry_form.phone_number }}
+                        <!-- Display the form field (input, textarea, etc.) -->
+                    </div>
+
+                    <!-- Display help text if available -->
+                    {% if general_enquiry_form.phone_number.help_text %}
+                    <div class="help-text">
+                        {{ general_enquiry_form.phone_number.help_text }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Display field errors -->
+                    {% if general_enquiry_form.phone_number.errors %}
+                    <div class="error">
+                        {{ general_enquiry_form.phone_number.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="input-container">
+                    <div class="label-container">
+                        {{ general_enquiry_form.company_name.label_tag }} <!-- Display field label -->
+                    </div>
+                    <div class="input">
+                        {{ general_enquiry_form.company_name }}
+                        <!-- Display the form field (input, textarea, etc.) -->
+                    </div>
+
+                    <!-- Display help text if available -->
+                    {% if general_enquiry_form.company_name.help_text %}
+                    <div class="help-text">
+                        {{ general_enquiry_form.company_name.help_text }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Display field errors -->
+                    {% if general_enquiry_form.company_name.errors %}
+                    <div class="error">
+                        {{ general_enquiry_form.company_name.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-container">
+                    <div class="label-container">
+                        {{ general_enquiry_form.message.label_tag }} <!-- Display field label -->
+                    </div>
+                    <div class="input">
+                        {{ general_enquiry_form.message }}
+                        <!-- Display the form field (input, textarea, etc.) -->
+                    </div>
+
+                    <!-- Display help text if available -->
+                    {% if general_enquiry_form.message.help_text %}
+                    <div class="help-text">
+
+                        {{ general_enquiry_form.message.help_text }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Display field errors -->
+                    {% if general_enquiry_form.message.errors %}
+                    <div class="error">
+                        {{ general_enquiry_form.message.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="input-container">
+            <input type="submit" name="submit" value="Submit" class="generic-form-submit-button">
+        </div>
+    </form>
+</section>
 {%endblock%}

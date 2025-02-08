@@ -1,3 +1,67 @@
-<h1>
-    Recieved New Enquiry
-</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Enquiry Notification</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333;">
+    <table style="width: 100%; max-width: 600px; margin: 20px auto; background-color: #ffffff; border-collapse: collapse; border: 1px solid #e0e0e0;">
+        <thead>
+            <tr style="background-color: #4CAF50; color: #ffffff;">
+                <th colspan="2" style="text-align: left; padding: 15px; font-size: 20px;">New Enquiry Notification</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="2" style="padding: 15px; font-size: 16px;">
+                    You have received a new enquiry from <strong>{{ enquiry.full_name }}</strong>.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7; width: 35%;"><strong>Full Name:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.full_name }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Email:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.email_id }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Phone:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.phone_number }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Company Name:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.company_name }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Budget:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.budget }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Services:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.services }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Message:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.requirement }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Journey Path:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.journey_path }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; font-size: 14px; background-color: #f7f7f7;"><strong>Status:</strong></td>
+                <td style="padding: 10px; font-size: 14px;">{{ enquiry.status }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2" style="text-align: center; padding: 15px; font-size: 12px; color: #888;">
+                    This is an automated message. Please do not reply to this email.
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

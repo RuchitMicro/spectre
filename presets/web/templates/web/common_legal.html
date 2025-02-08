@@ -1,0 +1,17 @@
+{%extends 'web/layout.html'%}
+{% load static %}
+
+{%block content%}
+<link rel="stylesheet" href="{%static 'web/css/blog.css'%}">
+
+<section style="margin-top: 50px; padding: 1rem;">
+    {{content|safe}}
+</section>
+
+<style>
+    .global-cta-container {
+        display: none;
+    }
+</style>
+
+{%endblock%}
