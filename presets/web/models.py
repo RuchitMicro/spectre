@@ -42,14 +42,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 # Urllib
 import urllib.parse
 
-# Simple History Model
-from simple_history.models import HistoricalRecords
-
-# Model Utils
-from model_utils        import FieldTracker
-from model_utils.fields import MonitorField, StatusField
-
-
 
 
 
@@ -60,9 +52,6 @@ class CommonModel(models.Model):
     updated_at      =   models.DateTimeField    (auto_now=True, blank=True, null=True)
     created_by      =   models.CharField        (max_length=300, blank=True, null=True)
     updated_by      =   models.CharField        (max_length=300, blank=True, null=True)
-    
-    history                 =   HistoricalRecords(inherit=True)
-    tracker                 =   FieldTracker()
 
     admin_meta      =   {}
     
@@ -88,22 +77,23 @@ class SiteSetting(CommonModel):
     global_head             =   models.TextField    (blank=True,null=True, help_text='Common <head> data. It will appear in all pages.')
 
     address                 =   models.TextField    (blank=True,null=True,max_length=500)
+    iframe                  =   models.URLField     (blank=True, null=True, max_length=999)
     contact_number          =   models.CharField    (blank=True,null=True,max_length=13)
     email                   =   models.EmailField   (blank=True,null=True)
+    admin_email             =   models.EmailField   (blank=True, null=True, max_length=300,help_text='Email of the admin. All the Enquiries will be sent to this email.', default='team@example.com')
     gst                     =   models.CharField    (blank=True,null=True,max_length=15, help_text="GST Number")
-    extra_contact_details   =   models.TextField           (blank=True,null=True)
+    extra_contact_details   =   models.TextField     (blank=True,null=True)
 
     facebook                =   models.URLField     (blank=True,null=True,max_length=100)
     instagram               =   models.URLField     (blank=True,null=True,max_length=100)
     twitter                 =   models.URLField     (blank=True,null=True,max_length=100)
     linkedin                =   models.URLField     (blank=True,null=True,max_length=100)
+    youtube                 =   models.URLField     (blank=True,null=True,max_length=100)
 
     vision                  =   models.TextField    (blank=True,null=True)
     mission                 =   models.TextField    (blank=True,null=True)
     values                  =   models.TextField    (blank=True,null=True)
     brochure                =   models.FileField    (blank=True,null=True,upload_to='settings/')
-    
-    navigation_menu         =   models.JSONField    (blank=True, null=True)
 
     about_us                =   models.TextField       (blank=True,null=True)
     terms_and_conditions    =   models.TextField       (blank=True,null=True)
@@ -112,56 +102,41 @@ class SiteSetting(CommonModel):
     disclaimer              =   models.TextField       (blank=True,null=True)
 
     robots                  =   models.FileField    (blank=True,null=True,upload_to='settings/')
-    
-
-    # JSON FIELD SCHEMA
-    key_value_pair_schema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "type": "object",
-        "properties": {
-            "navMenu": {
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/menuItem"
-            }
-            }
-        },
-        "definitions": {
-            "menuItem": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string",
-                    "description": "Unique identifier for the menu item."
-                },
-                "label": {
-                    "type": "string",
-                    "description": "Display text for the menu item."
-                },
-                "url": {
-                    "type": "string",
-                    "format": "uri",
-                    "description": "URL link for the menu item."
-                },
-                "children": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/menuItem"
-                },
-                "description": "Nested menu items under this menu item."
-                }
-            },
-            "required": ["id", "label"],
-            "additionalProperties": False
-            }
-        }
-    }
 
         
     admin_meta = {
-        "json_fields": {
-            "navigation_menu": {"schema":  json.dumps(key_value_pair_schema)},
-        }
+        'fieldsets' : [
+            ('General', {
+                'classes': ['tab'],
+                'fields' : ['logo', 'favicon',]},
+            ),
+            ('Social Media', {
+                'classes': ['tab'],
+                'fields' : ['facebook', 'instagram', 'twitter', 'linkedin', 'youtube'],
+                }),
+            ('Contact Information',{
+                'classes': ['tab'],
+                'fields' : ['address','iframe', 'contact_number', 'email', 'gst', 'extra_contact_details'],
+            }),
+            ('Vision & Mission',{
+                'classes': ['tab'],
+                'fields' : ['vision', 'mission', 'values', 'brochure'],
+            }),
+            ('Security & Compliance',{
+                'classes': ['tab'],
+                'fields' : ['about_us','terms_and_conditions', 'privacy_policy', 'return_policy', 'disclaimer'],
+            }),
+            ('Mail',{
+                'classes': ['tab'],
+                'fields' : ['admin_email',],
+            }),
+            ('SEO',{
+                'classes': ['tab'],
+                'fields' : ['global_head', 'robots',],
+            }),
+        ],
+        'single_entry' : True,
+        'rtf_exclude' : ['global_head', 'address', 'extra_contact_details'],
     }
     
     def __str__(self):
@@ -169,9 +144,6 @@ class SiteSetting(CommonModel):
 
     class Meta:
         verbose_name_plural = "Site Setting"
-    
-    def save(self, *args, **kwargs):
-        super(SiteSetting, self).save(*args, **kwargs)
 
 
 # Image Master
@@ -179,17 +151,12 @@ class ImageMaster(CommonModel):
     name                =   models.CharField        (max_length=300)
     image               =   models.ImageField       (upload_to="image_master/")
     
-    created_at          =   models.DateTimeField    (auto_now_add=True, blank=True, null = True)
-    updated_at          =   models.DateTimeField    (auto_now=True, blank=True, null=True)
-    
     admin_meta = {
-        'list_display': ['name', 'image','__str__', 'created_at', 'updated_at', 'created_by', 'updated_by',],   
+        'list_display': ['name', 'image', 'created_at', 'updated_at', 'created_by', 'updated_by',],   
     }
 
     def __str__(self):
-        return mark_safe(
-            '<div style="height:200px;width:200px;"><img src='+self.image.url+' style="object-fit:contain;height:100%;width:100%" alt=""></div>'
-        )
+        return str()
 
 
 # File Master
@@ -197,55 +164,72 @@ class FileMaster(CommonModel):
     name                =   models.CharField    (max_length=300)
     file                =   models.FileField    (upload_to='file_master/')
 
-    created_at          =   models.DateTimeField    (auto_now_add=True, blank=True, null = True)
-    updated_at          =   models.DateTimeField    (auto_now=True, blank=True, null=True)
-
     admin_meta = {
-        'list_display': ['name', 'file', '__str__', 'created_at', 'updated_at', 'created_by', 'updated_by'],   
+        'list_display': ['name', 'file', 'get_file_type', 'created_at', 'updated_at', 'created_by', 'updated_by'],   
     }
 
+    # give me the file type
+    def get_file_type(self):
+        return self.file.name.split('.')[-1]
+    
     def __str__(self):
         return str(self.name)
+    
+# Banner Image
+class BannerImage(CommonModel):
+    title           =   models.CharField    (max_length=300, blank=True, null=True, help_text='Title of the Banner Image. This name is shown in the Home page.')
+    desktop_image   =   models.ImageField   (upload_to="desktop_banner_image/", blank=True, null=True, help_text='Banner image for desktop. This Image is shown in the Home page.')
+    mobile_image    =   models.ImageField   (upload_to="mobile_banner_image/", blank=True, null=True, help_text='Banner image for mobile. This Image is shown in the Home page.')
+    description     =   models.TextField    (null=True,blank=True, help_text='Banner description')
+    order_by        =   models.IntegerField (default=0, blank=True, null=True)
+
+    def image_display(self):
+        if self.desktop_image:
+            return mark_safe(
+                        '<div style="height:200px;width:200px;"><img src='+self.desktop_image.url+' style="object-fit:contain;height:100%;width:100%" alt=""></div>'
+                    )        
+        return "No image available"
+    
+    admin_meta = {
+        'list_display': ['title', 'image_display', 'description', 'order_by'],
+        'list_editable' : ['order_by'],
+        'ordering': ['order_by'],
+        'search_fields': ['title', 'desktop_image','mobile_image']
+    }
+    
+    def __str__(self):
+        return (self.title)
+    
+    class Meta:
+        verbose_name_plural = "Banner Image"
+        ordering            = ['order_by']
+
 
 # Contact
 class Contact(CommonModel):
-    full_name       =   models.CharField(max_length=300)
-    email_id        =   models.EmailField(max_length=300)
-    phone_number    =   models.CharField(max_length=20)
-    company_name    =   models.CharField(max_length=300)  # Added this field
-    budget          =   models.CharField(max_length=100)  # Added this field to store budget range
-    services        =   models.TextField()  # Added this field to store selected services
-    requirement     =   models.TextField()
-    email_ok        =   models.BooleanField(default=False)
-    journey_path    =   models.TextField(
-        blank=True, null=True, help_text='A complete URL trace of the user journey that led them to fill the form.',
-    )
-    status          =   models.TextField(default='New', null=True, blank=True)
+    full_name       =   models.CharField    (max_length=300)
+    email           =   models.EmailField   (max_length=300)
+    phone_number    =   models.CharField    (max_length=20)
+    requirement     =   models.TextField    ()
 
-    admin_meta =    {
-        'list_display'      :   ("full_name","email_id","phone_number","company_name","budget","services","requirement","status","journey_path_as_list","created_at"),
-        'list_per_page'     :   50,
-        'list_filter'       :   ("budget","status","created_at",),
-        'search_fields'     :   ("full_name","email_id","phone_number","company_name","budget",),
+    journey_path    =   models.TextField    (blank=True, null=True, help_text='A complete url trace of user journey that lead them to fill the form.')
+
+    admin_meta = {
+        'list_display': ['full_name', 'email', 'phone_number', 'created_at', 'updated_at',],
+        'search_fields': ['full_name', 'email', 'phone_number',],
+        'rtf_exclude' : ['requirement', 'journey_path'],
     }
 
-    def journey_path_as_list(self):
-        paths = self.journey_path.split('|') if self.journey_path else []
-        html = ''.join([f'<div style="display: inline; background-color: #e0e0e0; padding: 5px; border-radius: 4px;">{path}</div>' for path in paths])
-        return mark_safe(f"<div style='display: flex; grid-gap: 5px; flex-wrap: wrap;'>{html}</div>")
     def __str__(self):
         return str(self.full_name)
 
     # Notification to Support about a new entry
     def send_mail_notification(self):
-        from django.template.loader import render_to_string
-        from django.core.mail import send_mail
-
-        msg_html = render_to_string('email/new_enquiry.html', {'enquiry': self})
+        msg_html = render_to_string('web/email/new_enquiry.html', {'Contact': self})
         send_mail(
             'New enquiry from WOLFx',
             'Hello',
-            'hello@wolfx.io',
+            'support@wolfx.io',
             ['hello@wolfx.io'],
             fail_silently=True,
             html_message=msg_html,
@@ -253,20 +237,15 @@ class Contact(CommonModel):
 
     # Notification to User
     def send_mail_greeting(self):
-        from django.template.loader import render_to_string
-        from django.core.mail import send_mail
-
-        msg_html = render_to_string('email/thank_you_for_contacting.html', {'enquiry': self})
+        msg_html = render_to_string('web/email/thank_you_for_contacting.html', {'Contact': self})
         send_mail(
             'WOLFx: Thank you for Contacting us',
             'Hello',
-            'hello@wolfx.io',
-            [self.email_id],
+            'support@wolfx.io',
+            ['hello@wolfx.io'],
             fail_silently=True,
             html_message=msg_html,
         )
-
-
 
 
 
@@ -277,6 +256,11 @@ class BlogCategory(CommonModel):
     slug        =   models.SlugField(max_length=100, unique=True)
     image       =   models.FileField(blank=True, null=True, upload_to='blog_category/')
     parent      =   models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='subcategories')
+
+    admin_meta = {
+        'list_display' : ['category', 'slug', 'created_at', 'updated_at',],
+        'search_fields' : ['category', 'slug',],
+    }
 
     def __str__(self):
         # Recursively build the full category path
@@ -320,19 +304,15 @@ class Blog(CommonModel):
     head                =   models.TextField        (null=True, blank=True, default=head_default)
     
     order_by            =   models.IntegerField     (default=0)
-    
-    created_at          =   models.DateTimeField    (auto_now_add=True, blank=True, null=True)
-    updated_at          =   models.DateTimeField    (auto_now=True, blank=True, null=True)
-    created_by          =   models.CharField        (max_length=300)
 
     admin_meta =    {
         'list_display'      :   ("__str__","category","created_at","updated_at"),
         'list_editable'     :   ("category",),
         'list_per_page'     :   50,
         'list_filter'       :   ("category",),
-        'inline'            :   [
-            {'BlogImage': 'blog'}
-        ]
+        'search_fields'     :   ("title","sub_title","category__category"),
+        'autocomplete_fields':   ("category",),
+        'rtf_exclude'       :   ['head',]
     }
 
     def __str__(self):
@@ -342,138 +322,69 @@ class Blog(CommonModel):
         verbose_name_plural = "Blog"
         ordering = ['order_by'] #Sort in desc order
 
-class BlogImage(CommonModel):
-    blog                =   models.ForeignKey       (Blog, on_delete=models.CASCADE)
-    image               =   models.ImageField       (upload_to="blog_images/")
-    order_by            =   models.IntegerField     (default=0)
-
-    def __str__(self):
-        return str(self.blog)
-
-    class Meta:
-        verbose_name_plural = "Blog Image"
-        ordering = ['order_by'] #Sort in desc order
-    
-
-# Case Study
-class CaseStudyCategory(CommonModel):
-    category    =   models.CharField    (max_length=100, unique=True)
-    slug        =   models.SlugField    (max_length=100, unique=True)
-    image       =   models.FileField    (blank=True,null=True,upload_to='case_study_category/')
-   
-    order_by    =   models.IntegerField (default=0)
-
-    admin_meta =    {
-        'list_display'      :   ("__str__","order_by"),
-        'list_editable'     :   ("order_by",),
-        'list_per_page'     :   50,
-    }
-
-    def __str__(self):
-        return str(self.category)
-    
-    class Meta:
-        verbose_name_plural = "Case Study Category"
-        ordering = ['order_by']
-
-class CaseStudy(CommonModel):
-    head_default='''<meta name="title" content=" ">
-<meta name="description" content=" ">
-<meta name="keywords" content=" ">
-<meta name="robots" content="index, follow">'''
-
-    title               =   models.CharField        (max_length=200)
-    sub_title           =   models.CharField        (max_length=200, blank=True ,null=True)
-    category            =   models.ForeignKey       (CaseStudyCategory, null=True, on_delete=models.SET_NULL)
-    thumbnail           =   models.ImageField       (upload_to="case-study-thumbnail/")
-    featured_text       =   models.TextField        (null=True, blank=True)
-    text                =   models.TextField        (null=True, blank=True)
-    slug                =   models.SlugField        (unique=True)
-    tags                =   models.TextField        (null=True, blank=True, default='all')
-    head                =   models.TextField        (null=True, blank=True, default=head_default)
-    
-    related_case_study  =   models.ManyToManyField   ('self', blank=True, related_name='related_case_study')
-
-    is_featured         =   models.BooleanField     (default=False)
-    order_by            =   models.IntegerField     (default=0)
-    
-    admin_meta =    {
-        'list_display'      :   ("__str__","is_featured","order_by","created_at","updated_at"),
-        'list_editable'     :   ("order_by","is_featured",),
-        'list_per_page'     :   50,
-        'list_filter'       :   ("order_by","is_featured",),
-        'filter_horizontal' :   ('related_case_study',),
-        'inline'            :   [
-            {'CaseStudyFAQ': 'case_study'}
-        ],
-    }
-
-    def __str__(self):
-        return str(self.title)
-
-    def split_tags(self):
-        return [t for t in self.tags.split(',')]
-
-    class Meta:
-        verbose_name_plural = "Case Study"
-        ordering = ['order_by'] #Sort in desc order
-
-class CaseStudyFAQ(CommonModel):
-    case_study      =   models.ForeignKey       (CaseStudy, on_delete=models.CASCADE)
-    question        =   models.CharField        (max_length=300)
-    answer          =   models.TextField               ()
-    order_by        =   models.IntegerField     (default=0)
-
-    def __str__(self):
-        return str(self.question)
-
-    class Meta:
-        verbose_name_plural = "Case Study FAQ"
-        ordering = ['order_by'] #Sort in desc order
-
-
-
-    
-# FAQ
 class FAQCategory(CommonModel):
-    category    =   models.CharField    (max_length=100, unique=True)
-    slug        =   models.SlugField    (max_length=100, unique=True)
-    image       =   models.FileField    (blank=True,null=True,upload_to='faq_category/')
+    name                =   models.CharField    (max_length=300, blank=True, null=True)
+    description         =   models.TextField    (blank=True, null=True)
+    order_by            =   models.IntegerField (default=0, blank=True, null=True)
     
-    order_by    =   models.IntegerField     (default=0)
-
-    admin_meta =    {
-        'list_display'      :   ("__str__","order_by"),
-        'list_editable'     :   ("order_by",),
-        'list_per_page'     :   50,
+    admin_meta = {
+        'list_display': ['name', 'description', 'order_by'],
+        'list_editable': ['description', 'order_by',],
+        'search_fields' : ['name', ],
+        'list_per_page': 50,
+        'ordering': ['order_by'],
     }
-
-    def __str__(self):
-        return str(self.category)
-
-    class Meta:
-        ordering = ['order_by']    
-
-class FAQ(CommonModel):
-    category    =   models.ForeignKey       (FAQCategory, null=True, on_delete=models.SET_NULL)
-    question    =   models.CharField        (max_length=300)
-    answer      =   models.TextField               ()
-
-    order_by    =   models.IntegerField     (default=0)
     
-    admin_meta =    {
-        'list_display'      :   ("__str__","answer","category","order_by"),
-        'list_editable'     :   ("order_by",),
-        'list_per_page'     :   50,
+    def __str__(self):
+        return str(self.name)
+    
+    class Meta:
+        verbose_name_plural = 'FAQ Categories'
+        ordering = ['order_by']
+    
+class FAQ(CommonModel):
+    category            =   models.ForeignKey   (FAQCategory, on_delete=models.CASCADE, blank=True, null=True)
+    question            =   models.CharField    (max_length=300, blank=True, null=True)
+    answer              =   models.TextField    (blank=True, null=True)
+    order_by            =   models.IntegerField (default=0, blank=True, null=True)
+
+    admin_meta = {
+        'list_display': ['question', 'answer','order_by'],
+        'list_editable': ['answer', 'order_by',],
+        'list_per_page': 50,
+        'autocomplete_fields' : ['category'],
     }
 
     def __str__(self):
         return str(self.question)
-
+    
     class Meta:
-        ordering = ['order_by'] #Sort in desc order
+        verbose_name_plural = 'FAQ'
+        ordering = ['order_by'] #Sort in Asc order
+        
 
+# Testimonial Models
+class Testimonial(CommonModel):
+    name            =   models.CharField    (max_length=300, null=True)
+    designation     =   models.CharField    (max_length=300, null=True)
+    image           =   models.ImageField   (blank=True, null=True, upload_to='testimonial/')
+    description     =   models.TextField    (null=True)
+    logo            =   models.ImageField   (blank=True, null=True, upload_to='testimonial/company_logo/')
+    order_by        =   models.IntegerField (default=0, blank=True, null=True)
 
+    admin_meta = {
+        'list_display': ['name', 'designation', 'image', 'logo'],
+        'list_per_page': 50,
+        'search_fields': ['name', 'designation'],
+        'ordering' : ['order_by']
+    }
+
+    def __str__(self):
+        return str(self.name) if self.name else str(self.id)
+    
+    class Meta:
+        verbose_name_plural = 'Testimonials'
+        ordering = ['order_by'] #Sort in Asc order
 
 
 # Dynamic Head
@@ -482,6 +393,13 @@ class FAQ(CommonModel):
 class Head(CommonModel):
     target_url  =   models.URLField     (unique=True, help_text="Enter absolute URL of the target.  <br> Ex: https://wolfx.io/blog <br> https://wolfx.io/blog/ <br> https://wolfx.io/blog?category=UI-UX ")
     head        =   models.TextField    (help_text="Head Data")
+
+    admin_meta = {
+        'list_display'      :   ("target_url","head","created_at", "updated_at"),
+        'list_per_page'     :   50,
+        'rtf_exclude'       :   ("head")
+
+    }
 
     def __str__(self):
         return str(self.target_url)

@@ -17,11 +17,6 @@ urlpatterns = [
     path('terms-and-conditions/',   TermsAndConditionsView.as_view(),   name ='terms-and-conditions'),
     path('cookie-policy/',          CookiePolicyView.as_view(),         name ='cookie-policy'),
 
-    # Case Study 
-    path('case-study/',                     CaseStudyListView.as_view(),    name ='case-study'),
-    path('case-study/<slug:slug>/',         CaseStudyListView.as_view(),    name ='case-study'),
-    path('case-study-detail/<slug:slug>/',  CaseStudyDetailView.as_view(),  name ='case-study-detail'),
-
     # Keep these last Blog Contents
     path('blog/',               BlogListView.as_view(), name ='blog'),
     path('blog/<slug:slug>',    BlogListView.as_view(), name ='blog'),

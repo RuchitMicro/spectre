@@ -1,5 +1,6 @@
 [DEFAULT]
-project_name    =   wolfx_ecommerce
-preset          =   web
-project_path    =   /home/admin1/project
-env_path        =   /home/admin1/env
+admin_preset_url    =  https://raw.githubusercontent.com/zeeshan-wolfx/django-admin.py/django-unfold-admin/admin.py
+project_name        =   test_project
+preset              =   api
+project_path        =   /home/ubuntu/project
+env_path            =   /home/ubuntu/env

@@ -1,4 +1,4 @@
-Django==4.2.7
+Django==5.0.0
 django-cleanup
 django-cors-headers
 django-debug-toolbar
@@ -10,6 +10,7 @@ django-tinymce
 django-unfold
 djangorestframework
 djangorestframework-simplejwt
+django-api-helper
 gunicorn
 numpy
 packaging
@@ -23,3 +24,4 @@ sqlparse
 tablib
 typing_extensions
 tzdata
+dotenv

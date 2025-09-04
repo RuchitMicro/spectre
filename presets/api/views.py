@@ -46,7 +46,8 @@ from django_api_helper.decorators   import  error_handling, check_table_permissi
 # Import Export
 from import_export.formats.base_formats import CSV, XLS, XLSX
 
-from api.models                 import *
+from .models                import *
+from .auto_api              import generate_api
 
 
 
@@ -56,6 +57,30 @@ class IndexView(LoginRequiredMixin, APIView):
     
     def post(self, request, *args, **kwargs):
         return JsonResponse({'message': 'INDEX POST'})
+    
+class ReadOnlyView(GenericCRUDView):
+    def post(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
+    def patch(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
+    def delete(self, request, *args, **kwargs):
+        return HttpResponseForbidden()
+
+
+
+# Generate views + urls in one go
+GENERATED_VIEWS, AUTOGEN_URLPATTERNS = generate_api(
+    app_label="api",                 # <-- change to your app label
+    base_view=ReadOnlyView,
+    serializer_factory=create_model_serializer,
+    permission_classes=[],               # same as your examples
+    exclude={"Contact", "Head"},         # by name or by model class
+)
+
+# Export generated views to module namespace so they are importable (nice for admin/docs)
+globals().update(GENERATED_VIEWS)
     
 
 
