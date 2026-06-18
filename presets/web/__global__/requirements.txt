@@ -7,9 +7,8 @@ django-filter
 django-tinymce
 django-import-export
 django-model-utils
+django-recaptcha
 django-simple-history
-djangorestframework
-djangorestframework-simplejwt
 gunicorn
 Pillow
-pandas
+

@@ -32,6 +32,10 @@ from rest_framework.permissions     import IsAuthenticated, IsAdminUser, AllowAn
 from rest_framework.pagination      import PageNumberPagination
 from rest_framework.filters         import SearchFilter, OrderingFilter
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework                 import generics
+
 # Send mail Django's Inbuilt function
 from django.core.mail           import send_mail
 from django.template.loader     import render_to_string
@@ -46,46 +50,178 @@ from django_api_helper.decorators   import  error_handling, check_table_permissi
 # Import Export
 from import_export.formats.base_formats import CSV, XLS, XLSX
 
-from api.models                 import *
+from .models                import *
+from .serializers           import *
 
 
 
-class IndexView(LoginRequiredMixin, APIView):
+class IndexView(APIView):
     def get(self, request, *args, **kwargs):
-        return JsonResponse({'message': 'INDEX GET'})
+        return Response({'message': 'Healthy and alive!'}, status=status.HTTP_200_OK)
     
+class ReadOnlyView(GenericCRUDView):
+    http_method_names       = ["get", "head", "options"]
+    bypass_table_permission = True
+    permission_classes      = [AllowAny]
+
+    def get_serializer_class(self):
+        if not self.model:
+            raise AssertionError("ReadOnlyView requires a 'model' attribute.")
+        return create_model_serializer(self.model)
+
     def post(self, request, *args, **kwargs):
-        return JsonResponse({'message': 'INDEX POST'})
+        return Response({"error": "Method not allowed", "status": status.HTTP_405_METHOD_NOT_ALLOWED})
+
+    def patch(self, request, *args, **kwargs):
+        return Response({"error": "Method not allowed", "status": status.HTTP_405_METHOD_NOT_ALLOWED})
+
+    def delete(self, request, *args, **kwargs):
+        return Response({"error": "Method not allowed", "status": status.HTTP_405_METHOD_NOT_ALLOWED})
+
+
+class CreateOnlyView(GenericCRUDView):
+    http_method_names       = ["post", "head", "options"]
+    bypass_table_permission = True
+    permission_classes      = [AllowAny]
+
+    def get_serializer_class(self):
+        if not self.model:
+            raise AssertionError("CreateOnlyView requires a 'model' attribute.")
+        return create_model_serializer(self.model)
     
+    # Fully generic schema generator
+    def get(self, request, *args, **kwargs):
+        return Response({"error": "Method not allowed", "status": status.HTTP_405_METHOD_NOT_ALLOWED})
+
+    def patch(self, request, *args, **kwargs):
+        return Response({"error": "Method not allowed", "status": status.HTTP_405_METHOD_NOT_ALLOWED})
+
+    def delete(self, request, *args, **kwargs):
+        return Response({"error": "Method not allowed", "status": status.HTTP_405_METHOD_NOT_ALLOWED})
+
+# ---------------------------------------------------------------------------
+# Site / SEO
+# ---------------------------------------------------------------------------
+
+class SiteSettingAPIView(ReadOnlyView):
+    model = SiteSetting
+
+class HeadAPIView(ReadOnlyView):
+    model = Head
+
+class BannerAPIView(ReadOnlyView):
+    model = BannerImage
+
+# ---------------------------------------------------------------------------
+# User
+# ---------------------------------------------------------------------------
+
+class ProfileAPIView(GenericCRUDView):
+    model = Profile
+    permission_classes = [IsAuthenticated]
+    serializer_class = create_model_serializer(Profile)
+    bypass_table_permission = True
+
+    def get_object(self):
+        try:
+            return self.request.user.profile
+        except Profile.DoesNotExist:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        profile = self.get_object()
+        if profile is None:
+            return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        return Response({"error": "Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
+
+    def patch(self, request, *args, **kwargs):
+        profile = self.get_object()
+        if profile is None:
+            return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ProfileUpdateSerializer(
+            profile, data=request.data, partial=True, context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        return Response({"error": "Permission Denied"}, status=status.HTTP_403_FORBIDDEN)
+
+# ---------------------------------------------------------------------------
+# Content
+# ---------------------------------------------------------------------------
+
+class ContactAPIView(CreateOnlyView):
+    model = Contact
+
+class BlogCategoryAPIView(ReadOnlyView):
+    model = BlogCategory
+
+class BlogAPIView(ReadOnlyView):
+    model = Blog
+
+class FAQCategoryAPIView(ReadOnlyView):
+    model = FAQCategory
+
+class FAQAPIView(ReadOnlyView):
+    model = FAQ
+
+class TestimonialAPIView(ReadOnlyView):
+    model = Testimonial
 
 
-# Django Unfold Admin
-def dashboard_callback(request, context):
 
-    # if(closing.object.get(date=yesterday_date).exists()):
-    # do nothing
-    # else
-    # incoming_money_total = get all incoming money of yesterday
-    # outgoing_money_total = get all outgoing money of yesterday
-    # yesterday_closing_balance = incoming_money_total - outgoing_money_total
-    # total_balance = 
-    # closing.object.create(date=yesterday_date, closing_balance=yesterday_closing_balance)
+# ---------------------------------------------------------------------------
+# Auth
+# ---------------------------------------------------------------------------
+
+class UserRegistrationAPIView(CreateAPIView):
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-    context.update({
-        "custom_variable": "value",
-        "cards": [
-            {"title": "Card 1", "metric": "Metric 1"},
-            {"title": "Card 2", "metric": "Metric 2"},
-            {"title": "Card 3", "metric": "Metric 3"},
-        ],
-        "navigation": [
-            {"title": "Dashboard", "link": "/", "icon": "dashboard"},
-            {"title": "Users", "link": "/admin/users", "icon": "people"},
-        ],
-        "filters": [
-            {"title": "Filter 1", "link": "/filter1"},
-            {"title": "Filter 2", "link": "/filter2"},
-        ],
-    })
-    return context
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+class PasswordResetView(generics.CreateAPIView):
+    serializer_class = PasswordResetSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Password reset email sent.'}, status=status.HTTP_200_OK)
+
+class PasswordResetConfirmView(generics.UpdateAPIView):
+    serializer_class = PasswordResetConfirmSerializer
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Password has been reset.'}, status=status.HTTP_200_OK)
