@@ -23,7 +23,13 @@ console = Console()
 
 @app.command()
 def main() -> None:
-    project_name, preset, project_path, env_path, admin_preset_url = read_params()
+    params = read_params()
+    project_name    = params['project_name']
+    preset          = params['preset']
+    project_path    = params['project_path']
+    env_path        = params['env_path']
+    admin_preset_url = params['admin_preset_url']
+    db              = params['db']
 
     project_full_path = project_path / project_name
     venv_path = env_path / project_name
@@ -66,6 +72,14 @@ def main() -> None:
 
     console.print(f"[bold green]Adding settings.py Config {preset}...[/bold green]")
     PlaceholderReplacer().replace_project_placeholders(project_full_path, project_name)
+
+    if preset == 'saas':
+        # create_database
+        console.print(f"[bold green]Creating database...[/bold green]")
+        dj.add_database_to_dotenv(project_full_path, db['db_name'], db['db_user'], db['db_password'], db['db_host'], db['db_port'])
+        dj.create_database(project_full_path, db['db_name'] )
+        dj.create_database(project_full_path)
+        
 
     console.print(f"[bold green]Running database migrations...[/bold green]")
     dj.run_migrations(project_full_path)

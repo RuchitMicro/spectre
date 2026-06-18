@@ -12,10 +12,18 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib                    import Path
+from datetime                   import timedelta
 from django.templatetags.static import static
 from django.urls                import reverse_lazy
 from django.utils.translation   import gettext_lazy as _
+from corsheaders.defaults       import default_headers
 from dotenv                     import load_dotenv
+
+
+from .logging_config           import LOGGING
+from .loggers                  import django_console_logger
+
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,11 +34,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY  = os.getenv("SECRET_KEY")
+DEBUG       = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
-print(f"DEBUG mode is set to: {DEBUG}")
+if DEBUG:
+    django_console_logger.warning("Using in DEBUG mode")
+else:
+    django_console_logger.info("Using in PRODUCTION mode")
+
 
 ALLOWED_HOSTS = ['*']
 
@@ -58,17 +69,22 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'django_filters', # Django Filters
-    'rest_framework', # Django Rest Framework
-    'django_api_helper', # Django API Admin
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'django_api_helper',
 
     'api',
 ]
 
+
+AUTH_USER_MODEL = 'api.User'
+
 APPEND_SLASH                = True
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # This should be near the top
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # This should be near the top
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -157,66 +173,94 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Rest Framework
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
     ], 
     'DEFAULT_PAGINATION_CLASS': 'django_api_helper.pagination.CustomPageNumberPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'PAGE_SIZE': 24,  # Number of results per page
+    'PAGE_SIZE': 20,  # Number of results per page
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
 }
 SERIALIZER_MIN_DEPTH = 1
 SERIALIZER_MAX_DEPTH = 3
 
-if DEBUG:
-    CSRF_TRUSTED_ORIGINS = [
-        "https://*.scotttiger.in",
-        "http://*.scotttiger.in",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000", 
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",    
-    ]
-    CSRF_COOKIE_SECURE = False
-    CORS_ALLOW_HEADERS = ['*']
-    CORS_ALLOW_METHODS = ['*']
-    CORS_ALLOW_CREDENTIALS = True
-    CORS_ORIGIN_ALLOW_ALL = True
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+}
 
-else:
-    # CORS
-    CORS_ALLOW_METHODS = [
-        'GET',
-        'POST',
-        'PUT',
-        'PATCH',
-        'DELETE',
-        'OPTIONS'
-    ]
-    # CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",  # Add your frontend's URL here
-        "http://localhost:8000",  # Add your frontend's URL here
-        "https://{{project_name}}.vercel.app",
-        "http://{{project_name}}.com",
-        "https://{{project_name}}.com",
-        "http://api.{{project_name}}.com",
-        "https://api.{{project_name}}.com",
-        "http://www.{{project_name}}.com",
-        "https://www.{{project_name}}.com",
-    ]
+# Changed
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "ngrok-skip-browser-warning",
+]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+# Changed
+COMMON_ORIGINS = [
+    "https://takqt.com",
+    "https://www.takqt.com",
+    "https://api.takqt.com",
+    # local host origins are handled separately in DEBUG mode
+    "http://localhost:3000",
+]
+
+LOCAL_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+if DEBUG:
+    # Changed
+    CORS_ALLOW_ALL_ORIGINS = True
+
     CSRF_TRUSTED_ORIGINS = [
-        "http://localhost:3000",  # Add your frontend's URL here
-        "http://localhost:8000",  # Add your frontend's URL here
-        "https://{{project_name}}.vercel.app",
-        "http://{{project_name}}.com",
-        "https://{{project_name}}.com",
-        "http://api.{{project_name}}.com",
-        "https://api.{{project_name}}.com",
-        "http://www.{{project_name}}.com",
-        "https://www.{{project_name}}.com",
+        *COMMON_ORIGINS,
+        *LOCAL_ORIGINS,
+        "https://*.ngrok-free.app",
     ]
-    CORS_ALLOW_CREDENTIALS = True # If you need to allow credentials (cookies) in your request
-    CORS_ALLOW_HEADERS = ['*']
+
+    CSRF_COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'].append(
+        'rest_framework.renderers.BrowsableAPIRenderer'
+    )
+else:
+    # Changed
+    CORS_ALLOWED_ORIGINS = [
+        *COMMON_ORIGINS,
+    ]
+
+    CSRF_TRUSTED_ORIGINS = [
+        *COMMON_ORIGINS,
+    ]
+
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+
+    # Optional but recommended for production
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
 
 
 EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
@@ -226,6 +270,16 @@ EMAIL_USE_TLS       = True
 EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+    }
+}
+
+REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
 
 UNFOLD = {
     "SITE_TITLE": f"{'{{project_name}}'.replace('_', ' ').title()} Admin",

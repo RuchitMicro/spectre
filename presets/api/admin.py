@@ -1,6 +1,8 @@
 
 from pathlib                    import Path
 from django.contrib             import admin
+from django.contrib.auth.admin  import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin  import GroupAdmin as BaseGroupAdmin
 from django.forms.models        import modelform_factory
 from django.utils.translation   import gettext_lazy as _
 from django.db                  import models
@@ -12,6 +14,7 @@ from django.apps                import apps
 from unfold.admin                       import ModelAdmin, TabularInline, StackedInline
 from import_export.admin                import ImportExportModelAdmin
 from unfold.contrib.import_export.forms import ExportForm, ImportForm
+from unfold.forms                       import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 from django.utils.translation           import gettext_lazy as _
 from unfold.contrib.forms.widgets       import ArrayWidget, WysiwygWidget
 
@@ -31,9 +34,18 @@ try:
 except ImportError:
     COMMON_MODEL_AVAILABLE = False
 
+# user / group
+try:
+    admin.site.unregister(Group)
+except admin.sites.AlreadyRegistered:
+    pass
+except Exception:
+    logger.exception("Failed to unregister Group")
+
+
 
 # CONFIG CONSTANTS
-exempt                  = [] # modelname in this list will not be registered
+exempt                  = ['user'] # modelname in this list will not be registered
 current_file_path       = Path(__file__).resolve()
 global_app_name         = current_file_path.parent.name  # Assumes this file is in the app directory
 
@@ -43,9 +55,27 @@ resource_class_mapping = {
 }
 
 
+
+@admin.register(User)
+class UserAdmin(BaseUserAdmin, ModelAdmin):
+    # Forms loaded from `unfold.forms`
+    form                    = UserChangeForm
+    add_form                = UserCreationForm
+    change_password_form    = AdminPasswordChangeForm
+
+
+@admin.register(Group)
+class GroupAdmin(BaseGroupAdmin, ModelAdmin):
+    pass
+
+
 class GenericStackedAdmin(TabularInline):
-    extra = 1
+    extra = 0
     tab = True
+    show_change_link = True
+    collapsible = True
+    per_page = 20
+    
 
     def __init__(self, parent_model, admin_site):
         super().__init__(parent_model, admin_site)
@@ -109,7 +139,6 @@ class GenericStackedAdmin(TabularInline):
         return formset
 
 
-
 class GenericAdmin(ModelAdmin, ImportExportModelAdmin):
     import_form_class = ImportForm
     export_form_class = ExportForm
@@ -139,7 +168,7 @@ class GenericAdmin(ModelAdmin, ImportExportModelAdmin):
                     if isinstance(action_name, str):
                         action_function = getattr(model, action_name, None)
                         if callable(action_function):
-                            self.add_action(action_function, action_name)
+                            self.add_action(action_name)
         except Exception as e:
             # Handle or log the exception
             pass
@@ -170,7 +199,7 @@ class GenericAdmin(ModelAdmin, ImportExportModelAdmin):
         if getattr(self.model, 'admin_meta', {}).get('single_entry') and self.model.objects.exists():
             return False
         return super().has_add_permission(request)
-          
+
     # Function to get the fieldsets
     def get_fieldsets(self, request, obj=None):
         if 'fieldsets' in self.admin_meta:
@@ -214,9 +243,6 @@ class GenericAdmin(ModelAdmin, ImportExportModelAdmin):
             if json_schema:
                 # Initialize the custom widget with the specified schema
                 kwargs['widget'] = JsonEditorWidget(schema=json_schema)
-            # else:                                                                                         # Patch this later
-            #     # Else load the django-jsoneditor widget 
-            #     kwargs['widget'] = JSONEditor()
             
         # Check if the field is a TextField and override the widget if not in exclude "rtf_exclude" 
         if isinstance(db_field, models.TextField):
@@ -231,28 +257,35 @@ class GenericAdmin(ModelAdmin, ImportExportModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         # Get a list of non-editable fields
         readonly_fields = [field.name for field in self.model._meta.fields if (not field.editable or field.name == 'id')]
-
+        readonly_fields += self.admin_meta.get('readonly_fields', [])
         return readonly_fields
     
     # Function to add actions to the admin class
-    def add_action(self, action_function, action_name):
-        def wrapper_action(modeladmin, request, queryset):
-            for obj in queryset:
-                action_method = getattr(obj, action_name)
-                if callable(action_method):
-                    action_method(request)
+    def add_action(self, action_name):
+        """
+        Bind a model method as a Django admin action.
 
-        wrapper_action.__name__ = f'admin_action_{action_name}'  # Change the name
-        wrapper_action.short_description = action_name.replace('_', ' ').title()
+        The model method must accept:
+            (modeladmin, request, queryset)
+        """
+        action_function = getattr(self.model, action_name, None)
+        if not callable(action_function):
+            return
 
-        if not hasattr(self, 'actions') or not self.actions:
-            self.actions = [wrapper_action]
-        else:
-            # Prevent re-adding the same action
-            if wrapper_action not in self.actions:
-                self.actions.append(wrapper_action)
-        
-        self.__dict__[wrapper_action.__name__] = wrapper_action
+        def wrapper_action(modeladmin, request, queryset, _action=action_function):
+            return _action(modeladmin, request, queryset)
+
+        wrapper_action.__name__ = f"admin_action_{action_name}"
+        wrapper_action.short_description = getattr(
+            action_function,
+            "short_description",
+            action_name.replace("_", " ").title(),
+        )
+
+        if wrapper_action not in self.actions:
+            self.actions.append(wrapper_action)
+
+        setattr(self, wrapper_action.__name__, wrapper_action)
     
     def register_inlines(self):
         if hasattr(self.model, 'admin_meta') and 'inline' in self.model.admin_meta:
@@ -301,3 +334,4 @@ for model_name, model in app.models.items():
 
         admin.site.register(model, admin_class)
     
+

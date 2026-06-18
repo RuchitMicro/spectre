@@ -15,6 +15,8 @@ class SettingsEditor:
         )
         m = block_re.search(text)
         if not m:
+            if app_name == 'saas':
+                return
             handle_error(f"INSTALLED_APPS not found in {settings_path}")
 
         prefix, body, suffix = m.groups()
