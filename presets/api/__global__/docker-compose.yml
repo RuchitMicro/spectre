@@ -1,44 +1,62 @@
-version: '3'
-
 services:
-  migrate:
-    build: .
-    command: python manage.py migrate --noinput
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-{{project_name}}}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
-      - .:/app
-    user: "myuser"
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  collectstatic:
-    build: .
-    command: python manage.py collectstatic --noinput
-    volumes:
-      - .:/app
-    depends_on:
-      - migrate
-    user: "myuser"
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   web:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 mira.wsgi:application
+    # Migrate and collect static on boot so there is one command to start the stack.
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 --timeout 60 {{project_name}}.wsgi:application"
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_URL: redis://redis:6379/1
     volumes:
-      - .:/app
-      - ./static:/app/static  # Ensure the static files are available to the web container
-      - ./media:/app/media  # Ensure the media files are available to the web container
-    ports:
-      - "8000:8000"
+      - static_files:/app/static
+      - media_files:/app/media
+    expose:
+      - "8000"
     depends_on:
-      - collectstatic
-    user: "myuser"
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   nginx:
-    image: nginx:latest
+    image: nginx:alpine
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./static:/static
-      - ./media:/media
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_files:/static:ro
+      - media_files:/media:ro
     depends_on:
       - web
-    user: "myuser"
 
+volumes:
+  postgres_data:
+  static_files:
+  media_files:

@@ -1,26 +1,28 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.12-slim
 
-# Create a non-root user
-RUN useradd -m myuser
+# Fail fast, no .pyc files, unbuffered logs so docker logs stay live.
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
 
-# Set the working directory
+# Build deps for psycopg and Pillow.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m appuser
+
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
-
-# Install any needed packages specified in requirements.txt
+# Copy requirements first so dependency layers cache across code changes.
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Change ownership of the /app directory
-RUN chown -R myuser:myuser /app
+COPY . /app
+RUN chown -R appuser:appuser /app
 
-# Switch to the new user
-USER myuser
+USER appuser
 
-# Make port 8000 available to the world outside this container
 EXPOSE 8000
 
-# Run the command to start Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "mira.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "60", "{{project_name}}.wsgi:application"]

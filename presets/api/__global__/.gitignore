@@ -153,23 +153,19 @@ dmypy.json
 # End of https://www.toptal.com/developers/gitignore/api/django
 db.sqlite3
 
-# Vscode
+# VS Code: keep the shared configs, ignore everything else
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
-
-# Local History for Visual Studio Code
 .history/
-.vscode/launch.json
-.vscode/settings.json
-web/__pycache__/views.cpython-38.pyc
-*.pyc
-*.pyc
-*.pyc
-*.pyc
-db.sqlite3
-db.sqlite3
+
+# Agent config: the shared setup is tracked, personal overrides are not
+.claude/settings.local.json
+
+# Logs written by logging_config.py
+logs/
+
 *.map

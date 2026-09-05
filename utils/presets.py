@@ -3,12 +3,16 @@ import os
 import shutil
 from pathlib import Path
 import requests
+from rich.console import Console
 
 from .constants import REQUESTS_TIMEOUT
 from .errors import handle_error
 from .utils import run_command
 from .venv_manager import VirtualEnvManager
 from .settings_editor import SettingsEditor
+
+
+console = Console()
 
 
 class PresetApplier:
@@ -53,16 +57,27 @@ class PresetApplier:
         else:
             handle_error(f"Preset directory {preset_dir} does not exist.")
 
-        # fetch admin.py template and write into app replacing 'web' with preset name
+        # Fetch the shared admin.py template and write it into the app, rebinding
+        # the hardcoded 'web' app label to this preset's name.
+        #
+        # This is best-effort: the preset ships its own admin.py (already copied
+        # above), so a network failure must not abort a scaffold that has already
+        # created the venv and the Django project.
         try:
             response = requests.get(admin_preset_url, timeout=REQUESTS_TIMEOUT)
             if response.status_code == 200:
                 admin_py_content = response.text.replace("'web'", f"'{preset}'")
                 (app_dir / "admin.py").write_text(admin_py_content)
             else:
-                handle_error("Failed to fetch admin.py from GitHub.")
+                console.print(
+                    f"[yellow]Could not fetch admin.py (HTTP {response.status_code}). "
+                    f"Keeping the admin.py bundled with the '{preset}' preset.[/yellow]"
+                )
         except requests.RequestException as exc:
-            handle_error(f"Failed to fetch admin.py from GitHub. Exception: {exc}")
+            console.print(
+                f"[yellow]Could not fetch admin.py ({exc}). "
+                f"Keeping the admin.py bundled with the '{preset}' preset.[/yellow]"
+            )
 
         # extra requirements from preset global
         self._install_requirements_if_any(global_dir / "requirements.txt")

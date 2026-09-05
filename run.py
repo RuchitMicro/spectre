@@ -15,6 +15,7 @@ from utils.presets          import PresetApplier
 from utils.placeholders     import PlaceholderReplacer
 from utils.vscode           import VSCodeLauncher
 from utils.errors           import handle_error
+from utils.utils            import generate_secret_key
 
 
 app     = typer.Typer()
@@ -71,7 +72,11 @@ def main() -> None:
         )
 
     console.print(f"[bold green]Adding settings.py Config {preset}...[/bold green]")
-    PlaceholderReplacer().replace_project_placeholders(project_full_path, project_name)
+    PlaceholderReplacer().replace_project_placeholders(
+        project_full_path,
+        project_name,
+        extra_tokens={"{{secret_key}}": generate_secret_key()},
+    )
 
     if preset == 'saas':
         # create_database

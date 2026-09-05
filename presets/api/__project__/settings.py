@@ -30,20 +30,42 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def env_list(name, default=""):
+    """Read a comma-separated environment variable into a clean list."""
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
+
+def env_bool(name, default="False"):
+    return os.getenv(name, default).strip().lower() in ("true", "1", "yes", "on")
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY  = os.getenv("SECRET_KEY")
-DEBUG       = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
+DEBUG       = env_bool("DEBUG", "True")
 
 if DEBUG:
     django_console_logger.warning("Using in DEBUG mode")
 else:
     django_console_logger.info("Using in PRODUCTION mode")
 
+if not SECRET_KEY:
+    # Fail loudly rather than starting with an empty key.
+    raise RuntimeError("SECRET_KEY is not set. Add it to .env before starting the project.")
 
-ALLOWED_HOSTS = ['*']
+
+# Permissive in development so the test client, ngrok, and LAN access all work.
+# Production reads the explicit list from .env.
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
+
+# Public base URL of the frontend that consumes this API.
+# Used to build password reset links, so it must point at the app, not the API.
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
 
 
 # Application definition
@@ -117,12 +139,27 @@ WSGI_APPLICATION = '{{project_name}}.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# SQLite by default so a fresh checkout runs with no services.
+# Set DB_NAME in .env to switch to PostgreSQL.
+if os.getenv("DB_NAME"):
+    DATABASES = {
+        'default': {
+            'ENGINE'    : 'django.db.backends.postgresql',
+            'NAME'      : os.getenv("DB_NAME"),
+            'USER'      : os.getenv("DB_USER", "postgres"),
+            'PASSWORD'  : os.getenv("DB_PASSWORD", ""),
+            'HOST'      : os.getenv("DB_HOST", "127.0.0.1"),
+            'PORT'      : os.getenv("DB_PORT", "5432"),
+            'CONN_MAX_AGE': int(os.getenv("DB_CONN_MAX_AGE", "60")),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -210,14 +247,9 @@ CORS_ALLOW_METHODS = [
     "OPTIONS",
 ]
 
-# Changed
-COMMON_ORIGINS = [
-    "https://takqt.com",
-    "https://www.takqt.com",
-    "https://api.takqt.com",
-    # local host origins are handled separately in DEBUG mode
-    "http://localhost:3000",
-]
+# Production origins come from .env so a deploy never needs a code change.
+# Format: CORS_ALLOWED_ORIGINS=https://example.com,https://www.example.com
+COMMON_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
 
 LOCAL_ORIGINS = [
     "http://localhost:3000",
@@ -271,21 +303,34 @@ EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
-        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-    }
-}
+# Redis is optional for local work. Set REDIS_URL in .env to switch the cache
+# over; without it the project runs on an in-process cache so a fresh checkout
+# starts with no external services.
+REDIS_URL = os.getenv("REDIS_URL", "").strip()
 
-REDIS_URL = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "{{project_name}}-locmem",
+        }
+    }
+    if not DEBUG:
+        django_console_logger.warning("REDIS_URL is not set; falling back to a per-process cache.")
 
 UNFOLD = {
     "SITE_TITLE": f"{'{{project_name}}'.replace('_', ' ').title()} Admin",
     "SITE_HEADER": f"{'{{project_name}}'.replace('_', ' ').title()}",
     "SITE_SUBHEADER": f"{'{{project_name}}'.replace('_', ' ').title()} Administration",
-    "SITE_URL": "https://{{project_name}}.com/",
+    "SITE_URL": FRONTEND_URL,
     "SITE_SYMBOL": "dashboard",
     "SHOW_VIEW_ON_SITE": True,
     # "THEME": "light",

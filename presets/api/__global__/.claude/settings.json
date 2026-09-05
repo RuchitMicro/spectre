@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py check:*)",
+      "Bash(python manage.py makemigrations:*)",
+      "Bash(python manage.py migrate:*)",
+      "Bash(python manage.py showmigrations:*)",
+      "Bash(python manage.py collectstatic:*)",
+      "Bash(python manage.py sqlmigrate:*)",
+      "Bash(python manage.py validate_templates:*)",
+      "Bash(pytest:*)",
+      "Bash(make check:*)",
+      "Bash(make test:*)",
+      "Bash(make verify:*)",
+      "Bash(make migrations:*)",
+      "Bash(make migrate:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(pip list:*)",
+      "Bash(pip show:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Bash(python manage.py flush:*)",
+      "Bash(python manage.py sqlflush:*)"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 [DEFAULT]
-admin_preset_url    =  https://raw.githubusercontent.com/zeeshan-wolfx/django-admin.py/django-unfold-admin/admin.py
+admin_preset_url    =  https://raw.githubusercontent.com/zeeshan-origin/django-admin.py/django-unfold-admin/admin.py
 project_name        =   test_project
 preset              =   api
 project_path        =   /home/ubuntu/project

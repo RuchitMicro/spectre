@@ -4,7 +4,6 @@ from typing import Any, Iterable, Optional
 from django.db                          import models, IntegrityError
 from django.db.models.aggregates        import Max
 from django.contrib.sessions.models     import Session
-from django.contrib.auth.models         import User
 from django.db.models                   import Avg
 from django.core.exceptions             import ValidationError
 from django.core.serializers            import serialize
@@ -15,11 +14,7 @@ from django.contrib.auth.models         import AbstractUser
 # Timezone
 from django.utils   import timezone
 
-# Signals
-from django.db.models.signals       import post_save
-from django.dispatch                import receiver
-
-# HTML Safe String  
+# HTML Safe String
 from django.utils.safestring        import mark_safe
 
 # Send mail Django's Inbuilt function
@@ -178,21 +173,6 @@ class Profile(CommonModel):
     class Meta:
         verbose_name_plural = "User Profiles"
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """Create a Profile for every new non-superuser."""
-    if not created or instance.is_superuser:
-        return
-
-    try:
-        Profile.objects.create(user=instance)
-    except Exception:
-        logger.exception(
-            "Failed to create profile for user: %s (id=%s)", 
-            instance.username or instance.email, 
-            instance.id
-        )
-
 
 # Global Settings
 class SiteSetting(CommonModel):
@@ -260,11 +240,27 @@ class SiteSetting(CommonModel):
             }),
         ],
         'single_entry' : True,
-        'rtf_exclude' : ['global_head', 'address', 'extra_contact_details'],
+        # Long-form prose gets the editor. global_head holds raw <head> markup and
+        # address/extra_contact_details are plain text, so they stay textareas.
+        'rtf_fields' : [
+            'vision', 'mission', 'values',
+            'about_us', 'terms_and_conditions', 'privacy_policy',
+            'return_policy', 'disclaimer',
+        ],
     }
     
     def __str__(self):
         return 'Edit Site Settings'
+
+    @classmethod
+    def load(cls):
+        """Return the singleton row, or None when it has not been created yet.
+
+        `single_entry` in admin_meta keeps the admin to one row, so `.first()`
+        is the whole lookup. Callers must handle None: a fresh database has no
+        SiteSetting until someone saves one.
+        """
+        return cls.objects.first()
 
     class Meta:
         verbose_name_plural = "Site Setting"
@@ -276,11 +272,11 @@ class ImageMaster(CommonModel):
     image               =   ImageField       (upload_to="image_master/")
     
     admin_meta = {
-        'list_display': ['name', 'image', 'created_at', 'updated_at', 'created_by', 'updated_by',],   
+        'list_display': ['name', 'image', 'created_at', 'updated_at', 'created_by', 'updated_by',],
     }
 
     def __str__(self):
-        return str()
+        return str(self.name)
 
 
 # File Master
@@ -318,7 +314,8 @@ class BannerImage(CommonModel):
         'list_display': ['title', 'image_display', 'description', 'order_by'],
         'list_editable' : ['order_by'],
         'ordering': ['order_by'],
-        'search_fields': ['title', 'desktop_image','mobile_image']
+        'search_fields': ['title', 'desktop_image','mobile_image'],
+        'rtf_fields': ['description'],
     }
     
     def __str__(self):
@@ -341,32 +338,44 @@ class Contact(CommonModel):
     admin_meta = {
         'list_display': ['full_name', 'email', 'phone_number', 'created_at', 'updated_at',],
         'search_fields': ['full_name', 'email', 'phone_number',],
-        'rtf_exclude' : ['requirement', 'journey_path'],
+        # User submitted content. Never run it through the editor.
+        'rtf_fields' : [],
     }
 
     def __str__(self):
         return str(self.full_name)
 
-    # Notification to Support about a new entry
+    # Notification to the site admin about a new entry.
+    # Recipient comes from SiteSetting so it is editable without a deploy.
     def send_mail_notification(self):
-        msg_html = render_to_string('web/email/new_enquiry.html', {'Contact': self})
+        site        = SiteSetting.load()
+        recipient   = getattr(site, 'admin_email', None) or settings.DEFAULT_FROM_EMAIL
+        if not recipient:
+            logger.warning("Contact %s: no admin_email configured, skipping notification.", self.pk)
+            return
+
+        msg_html = render_to_string('email/new_enquiry.html', {'contact': self, 'site': site})
         send_mail(
-            'New enquiry from WOLFx',
-            'Hello',
-            'support@wolfx.io',
-            ['hello@wolfx.io'],
+            f'New enquiry from {self.full_name}',
+            self.requirement or 'New enquiry',
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient],
             fail_silently=True,
             html_message=msg_html,
         )
 
-    # Notification to User
+    # Acknowledgement to the person who filled the form.
     def send_mail_greeting(self):
-        msg_html = render_to_string('web/email/thank_you_for_contacting.html', {'Contact': self})
+        if not self.email:
+            return
+
+        site     = SiteSetting.load()
+        msg_html = render_to_string('email/thank_you_for_contacting.html', {'contact': self, 'site': site})
         send_mail(
-            'WOLFx: Thank you for Contacting us',
-            'Hello',
-            'support@wolfx.io',
-            ['hello@wolfx.io'],
+            'Thank you for contacting us',
+            'Thank you for reaching out. We will get back to you shortly.',
+            settings.DEFAULT_FROM_EMAIL,
+            [self.email],
             fail_silently=True,
             html_message=msg_html,
         )
@@ -436,7 +445,9 @@ class Blog(CommonModel):
         'list_filter'       :   ("category",),
         'search_fields'     :   ("title","sub_title","category__category"),
         'autocomplete_fields':   ("category",),
-        'rtf_exclude'       :   ['head','tags']
+        # Article body is authored content. `head` is raw meta markup and `tags`
+        # is a comma separated list, so both stay plain.
+        'rtf_fields'        :   ['featured_text', 'text'],
     }
 
     def __str__(self):
@@ -457,6 +468,7 @@ class FAQCategory(CommonModel):
         'search_fields' : ['name', ],
         'list_per_page': 50,
         'ordering': ['order_by'],
+        'rtf_fields': ['description'],
     }
     
     def __str__(self):
@@ -477,6 +489,7 @@ class FAQ(CommonModel):
         'list_editable': ['answer', 'order_by',],
         'list_per_page': 50,
         'autocomplete_fields' : ['category'],
+        'rtf_fields': ['answer'],
     }
 
     def __str__(self):
@@ -500,7 +513,8 @@ class Testimonial(CommonModel):
         'list_display': ['name', 'designation', 'image', 'logo'],
         'list_per_page': 50,
         'search_fields': ['name', 'designation'],
-        'ordering' : ['order_by']
+        'ordering' : ['order_by'],
+        'rtf_fields': ['description'],
     }
 
     def __str__(self):
@@ -521,8 +535,8 @@ class Head(CommonModel):
     admin_meta = {
         'list_display'      :   ("target_url","head","created_at", "updated_at"),
         'list_per_page'     :   50,
-        'rtf_exclude'       :   ("head")
-
+        # `head` is raw <head> markup. The editor would rewrite it.
+        'rtf_fields'        :   [],
     }
 
     def __str__(self):
