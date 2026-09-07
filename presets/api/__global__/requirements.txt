@@ -1,5 +1,5 @@
 # Core
-Django>=4.2,<5.0
+Django~=5.2.0
 djangorestframework
 djangorestframework-simplejwt
 django-api-helper
