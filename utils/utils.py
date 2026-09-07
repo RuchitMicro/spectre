@@ -1,5 +1,6 @@
 
 import os
+import secrets
 import shutil
 import subprocess
 
@@ -34,3 +35,15 @@ def which(*names: str) -> str | None:
         if p:
             return p
     return None
+
+
+def generate_secret_key(length: int = 50) -> str:
+    """Generate a Django-style SECRET_KEY without importing Django.
+
+    Mirrors django.core.management.utils.get_random_secret_key(), but usable
+    before the project's virtualenv is on the path. The '$' and '%' characters
+    are excluded so the value stays safe to paste into .env and docker-compose,
+    where they would otherwise be interpolated.
+    """
+    alphabet = "abcdefghijklmnopqrstuvwxyz0123456789!@#^&*(-_=+)"
+    return "".join(secrets.choice(alphabet) for _ in range(length))

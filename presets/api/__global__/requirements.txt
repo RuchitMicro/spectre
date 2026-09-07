@@ -1,44 +1,35 @@
-asgiref
-certifi
-charset-normalizer
-colorlog
-diff-match-patch
-Django
-django-api-helper
-django-cleanup
-django-cors-headers
-django-debug-toolbar
-django-filter
-django-import-export
-django-model-utils
-django-redis
-django-simple-history
-django-tinymce
-django-unfold
+# Core
+Django>=4.2,<5.0
 djangorestframework
-djangorestframework_simplejwt
-dotenv
-gunicorn
-idna
-iniconfig
-numpy
-packaging
-pandas
-pillow
-pluggy
-psutil
-Pygments
-PyJWT
-pytest
-python-dateutil
-python-dotenv
-pytz
-razorpay
-redis
-requests
-six
-sqlparse
+djangorestframework-simplejwt
+django-api-helper
+
+# API surface
+django-filter
+django-cors-headers
+
+# Admin
+django-unfold
+django-import-export
+django-tinymce
+django-simple-history
+django-model-utils
+django-cleanup
 tablib
-typing_extensions
-tzdata
-urllib3
+
+# Infrastructure
+python-dotenv
+psycopg2-binary
+django-redis
+redis
+gunicorn
+
+# Media and logging
+Pillow
+colorlog
+requests
+
+# Development
+django-debug-toolbar
+pytest
+pytest-django

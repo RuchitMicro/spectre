@@ -1,0 +1,31 @@
+.git
+.gitignore
+.venv
+venv
+env
+__pycache__
+*.py[cod]
+*.egg-info
+
+# Local state that must never leak into an image
+.env
+db.sqlite3
+db.sqlite3-journal
+logs/
+media/
+static/
+
+# Tooling
+.vscode/
+.idea/
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.log
+
+# Docs and agent config are not needed at runtime
+CLAUDE.md
+AGENTS.md
+docs/
+.claude/
