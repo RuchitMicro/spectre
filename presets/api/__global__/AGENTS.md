@@ -171,10 +171,54 @@ model but does not support the library's `?download=1` file response.
 from {{project_name}}.loggers import logger
 ```
 
-`logs/app.log` for application logs, `logs/error.log` for 500s, `logs/access.log`
-for requests. All rotate at 10MB, keeping 10 files. Use `logger.exception` inside
-an `except` block so the traceback is captured. Never log credentials, tokens,
-request bodies, or uploaded file contents.
+| File | Holds |
+|------|-------|
+| `logs/app.log` | application logs, plus anything a third-party library logs |
+| `logs/access.log` | one line per HTTP request |
+| `logs/error.log` | 500s, with tracebacks |
+| `logs/security.log` | bad Host headers, CSRF failures, disallowed redirects |
+
+All rotate at 10MB keeping 10 files. Use `logger.exception` inside an `except`
+block so the traceback is captured. Never log credentials, tokens, request
+bodies, or uploaded file contents.
+
+### Request ids
+
+`RequestIDMiddleware` gives every request a short id, returns it as the
+`X-Request-ID` header, and stamps it on every log line written while that
+request is handled — including Django's own 500 line and any third-party
+library's output. So one request is recoverable from an interleaved log:
+
+```bash
+grep req=8745ac80fb2e logs/*.log        # text mode
+jq 'select(.request_id=="8745ac80fb2e")' logs/*.log   # json mode
+```
+
+A caller may supply its own `X-Request-ID` to trace across services; the value
+is rejected unless it matches `[A-Za-z0-9._-]{1,64}`, because it gets echoed
+into log files.
+
+The access line is written by the middleware, not by `django.server` — that
+logger only exists under `runserver`, so relying on it means an empty
+`access.log` in production. `django.server` is therefore pinned to WARNING,
+which is why static-asset requests no longer appear in dev.
+
+### Configuration
+
+Set in `.env`: `LOG_LEVEL`, `LOG_FORMAT` (`text` or `json`), `LOG_TO_FILE`,
+`LOG_DIR`, `SQL_DEBUG` (logs every query with timing — for chasing an N+1),
+`ADMIN_EMAILS` (emailed on unhandled 500s once `DEBUG=False`).
+
+`LOG_FORMAT=json` emits one JSON object per line, for a log shipper
+(Promtail/Alloy into Loki) to parse with `| json`. The field names —
+`ts, level, logger, msg, request_id, module, func, line, exc` plus
+`method, path, status, duration_ms, client_ip` on access lines — are the
+contract with whatever queries them, so renaming one breaks dashboards.
+Anything passed as `logger.info(..., extra={...})` is included automatically.
+
+In a container, set `LOG_TO_FILE=False` and `LOG_FORMAT=json` to log JSON to
+stdout. If the log directory is not writable the file handlers are dropped and
+logging falls back to the console rather than failing at import.
 
 ## Configuration
 

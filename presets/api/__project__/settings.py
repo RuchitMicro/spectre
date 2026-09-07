@@ -21,7 +21,7 @@ from dotenv                     import load_dotenv
 
 
 from .logging_config           import LOGGING
-from .loggers                  import django_console_logger
+from .loggers                  import logger
 
 
 load_dotenv()
@@ -47,9 +47,9 @@ SECRET_KEY  = os.getenv("SECRET_KEY")
 DEBUG       = env_bool("DEBUG", "True")
 
 if DEBUG:
-    django_console_logger.warning("Using in DEBUG mode")
+    logger.warning("Using in DEBUG mode")
 else:
-    django_console_logger.info("Using in PRODUCTION mode")
+    logger.info("Using in PRODUCTION mode")
 
 if not SECRET_KEY:
     # Fail loudly rather than starting with an empty key.
@@ -105,6 +105,8 @@ AUTH_USER_MODEL = 'api.User'
 APPEND_SLASH                = True
 
 MIDDLEWARE = [
+    # First, so every log line below it carries the request id.
+    '{{project_name}}.middleware.RequestIDMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # This should be near the top
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -296,12 +298,17 @@ else:
 
 
 EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST          = os.getenv('EMAIL_HOST')
 EMAIL_PORT          = 587
 EMAIL_USE_TLS       = True
 EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL  = EMAIL_HOST_USER
+
+# Emailed on unhandled 500s by the mail_admins handler in logging_config.py.
+# Only fires when DEBUG is False, so local work never sends mail.
+ADMINS   = [("Admin", email) for email in env_list("ADMIN_EMAILS")]
+MANAGERS = ADMINS
 
 # Redis is optional for local work. Set REDIS_URL in .env to switch the cache
 # over; without it the project runs on an in-process cache so a fresh checkout
@@ -324,7 +331,7 @@ else:
         }
     }
     if not DEBUG:
-        django_console_logger.warning("REDIS_URL is not set; falling back to a per-process cache.")
+        logger.warning("REDIS_URL is not set; falling back to a per-process cache.")
 
 UNFOLD = {
     "SITE_TITLE": f"{'{{project_name}}'.replace('_', ' ').title()} Admin",

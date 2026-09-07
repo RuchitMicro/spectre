@@ -7,6 +7,7 @@ Run with `pytest` or `make test`.
 """
 
 import io
+import json
 import uuid
 
 import pytest
@@ -38,6 +39,52 @@ def test_health_endpoint(client):
     response = client.get("/api/")
     assert response.status_code == 200
     assert response.json() == {"message": "Healthy and alive!"}
+
+
+# ---------------------------------------------------------------------------
+# Logging
+# ---------------------------------------------------------------------------
+
+def test_every_response_carries_a_request_id(client):
+    response = client.get("/api/")
+    assert response["X-Request-ID"]
+
+
+def test_caller_supplied_request_id_is_reused(client):
+    """Lets one id follow a request across services."""
+    response = client.get("/api/", headers={"X-Request-ID": "caller-supplied-1"})
+    assert response["X-Request-ID"] == "caller-supplied-1"
+
+
+def test_forged_request_id_is_rejected(client):
+    """A newline in the header would otherwise let a caller write fake log lines."""
+    response = client.get("/api/", headers={"X-Request-ID": "abc\ninjected ERROR line"})
+    assert "\n" not in response["X-Request-ID"]
+    assert response["X-Request-ID"] != "abc\ninjected ERROR line"
+
+
+def test_json_formatter_emits_one_parseable_object_per_line():
+    """The field names here are what a Loki query does `| json` on."""
+    import logging
+
+    from django.conf import settings
+
+    formatter = settings.LOGGING["formatters"]["json"]["()"]()
+    record = logging.LogRecord(
+        name="test", level=logging.INFO, pathname=__file__, lineno=1,
+        msg="GET %s %s", args=("/api/", 200), exc_info=None,
+    )
+    record.status = 200
+    record.duration_ms = 4.2
+
+    payload = json.loads(formatter.format(record))
+
+    assert payload["msg"] == "GET /api/ 200"
+    assert payload["level"] == "INFO"
+    assert payload["ts"].endswith("Z"), "Loki parses RFC3339"
+    assert payload["status"] == 200
+    assert payload["duration_ms"] == 4.2
+    assert payload["request_id"] == "-", "no request in flight"
 
 
 @pytest.mark.django_db
