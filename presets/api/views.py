@@ -43,7 +43,6 @@ from django.template.loader     import render_to_string
 # Django API Helper
 from django_api_helper.views        import  GenericCRUDView, GenericObjectPermissionView, GenericBulkUploadView
 from django_api_helper.serializers  import  create_model_serializer
-from django_api_helper.resources    import  create_dynamic_resource
 from django_api_helper.filters      import  DynamicFilterSetCreator
 from django_api_helper.decorators   import  error_handling, check_table_permissions
 
