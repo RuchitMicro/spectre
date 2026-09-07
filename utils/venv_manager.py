@@ -23,5 +23,5 @@ class VirtualEnvManager:
 
     def install_django(self) -> None:
         self.pip("install", "--upgrade", "pip")
-        self.pip("install", "django")
+        self.pip("install", "django~=5.2.0")
         

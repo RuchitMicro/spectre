@@ -75,7 +75,10 @@ def main() -> None:
     PlaceholderReplacer().replace_project_placeholders(
         project_full_path,
         project_name,
-        extra_tokens={"{{secret_key}}": generate_secret_key()},
+        extra_tokens={
+            "{{secret_key}}": generate_secret_key(),
+            "{{python_interpreter}}": str(venv.bin_path / "python"),
+        },
     )
 
     if preset == 'saas':
