@@ -180,6 +180,23 @@ def test_image_upload_is_renamed_and_compressed():
         assert img.width == 1920, "images wider than max_width should be resized"
 
 
+def test_final_name_respects_random_name_flag():
+    from types import SimpleNamespace
+
+    from .fields import RandomizedFieldFile
+
+    randomized = RandomizedFieldFile.__new__(RandomizedFieldFile)
+    randomized.field = SimpleNamespace(random_name=True)
+    stem = randomized._final_name("original name.jpg")
+    assert stem != "original name.jpg"
+    assert stem.endswith(".jpg")
+    uuid.UUID(stem[:-4])  # raises if the stem is not a UUID
+
+    kept = RandomizedFieldFile.__new__(RandomizedFieldFile)
+    kept.field = SimpleNamespace(random_name=False)
+    assert kept._final_name("original name.jpg") == "original name.jpg"
+
+
 # ---------------------------------------------------------------------------
 # Signals
 # ---------------------------------------------------------------------------

@@ -37,7 +37,7 @@ from django.conf            import settings
 import uuid
 
 # Django Validators
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import FileExtensionValidator, MaxValueValidator, MinValueValidator
 
 # Urllib
 import urllib.parse
@@ -205,8 +205,9 @@ class SiteSetting(CommonModel):
     return_policy           =   models.TextField       (blank=True,null=True)
     disclaimer              =   models.TextField       (blank=True,null=True)
 
-    robots                  =   FileField    (blank=True,null=True,upload_to='settings/')
-
+    # Infra files — exact filename matters, and alt/desc are meaningless.
+    robots                  =   FileField    (blank=True,null=True,validators=[FileExtensionValidator(allowed_extensions=['txt'])],upload_to='settings/', random_name=False)
+    sitemap                 =   FileField    (blank=True,null=True,validators=[FileExtensionValidator(allowed_extensions=['xml'])],upload_to='settings/', random_name=False)
         
     admin_meta = {
         'fieldsets' : [
@@ -236,7 +237,7 @@ class SiteSetting(CommonModel):
             }),
             ('SEO',{
                 'classes': ['tab'],
-                'fields' : ['global_head', 'robots',],
+                'fields' : ['global_head', 'robots', 'sitemap'],
             }),
         ],
         'single_entry' : True,

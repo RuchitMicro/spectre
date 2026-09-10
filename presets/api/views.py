@@ -63,7 +63,7 @@ class ReadOnlyView(GenericCRUDView):
     bypass_table_permission = True
     permission_classes      = [AllowAny]
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, *args, **kwargs):
         if not self.model:
             raise AssertionError("ReadOnlyView requires a 'model' attribute.")
         return create_model_serializer(self.model)
@@ -83,7 +83,7 @@ class CreateOnlyView(GenericCRUDView):
     bypass_table_permission = True
     permission_classes      = [AllowAny]
 
-    def get_serializer_class(self):
+    def get_serializer_class(self, *args, **kwargs):
         if not self.model:
             raise AssertionError("CreateOnlyView requires a 'model' attribute.")
         return create_model_serializer(self.model)
